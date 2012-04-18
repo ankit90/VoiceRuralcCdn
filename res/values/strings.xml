@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Click to enter the Rural CDN\n\n</string>
+    <string name="app_name">Voice Enhanced Rural CDN</string>
+    <string name="interfacs">Welcome to Voice Enabled Rural CDN</string>
+    <string name="upload_file">UPLOAD VIDEO</string>
+    <string name="upload">UPLOAD</string>
+    <string name="download">DOWNLOAD</string>
+    <string name="no_notes">No Videos Found</string>
+    <string name="menu_insert">Add Video</string>
+    <string name="menu_delete">Delete Video</string>
+    <string name="title">Title</string>
+    <string name="body">Description</string>
+    <string name="confirm">Confirm</string>
+    <string name="edit_note">Edit Note</string>
+    <string name="search_label">Search</string>
+    <string name="search_hint">Type of Video</string>
+</resources>

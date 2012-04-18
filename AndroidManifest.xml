@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.VoiceRuralCDN"
+      android:versionCode="1"
+      android:versionName="1.0">
+    <uses-sdk android:minSdkVersion="10" />
+   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+   <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+   <uses-permission android:name="android.permission.READ_CONTACTS" />
+      <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+      <uses-permission android:name="android.permission.RECORD_AUDIO" />
+      <uses-permission android:name="android.permission.USE_SIP" />
+  	<uses-feature android:name="android.hardware.sip.voip" android:required="true" />
+  	<uses-feature android:name="android.hardware.wifi" android:required="true" />
+  	<uses-feature android:name="android.hardware.microphone" android:required="true" />
+      
+
+   
+    <application android:icon="@drawable/icon" android:label="@string/app_name">
+		
+		<activity android:name=".VoiceRecog"
+                  android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+		<activity android:name=".FilePickerActivity"
+                  android:label="@string/app_name">
+        </activity>
+        <activity android:name=".SIP"
+                  android:label="@string/app_name">
+        </activity>
+		
+		<activity android:name=".Conference"
+                  android:label="@string/app_name">
+        </activity>
+		
+		<activity android:name=".playComment"
+                  android:label="@string/app_name">
+        </activity>
+		
+		<activity android:name=".VoiceRecorderActivity"
+                  android:label="@string/app_name">
+        </activity>
+		
+		<activity android:name=".ViewVoice"
+                  android:label="@string/app_name">
+        </activity>
+		
+		<activity android:name=".AudioRecorder"
+                  android:label="@string/app_name">
+        </activity>
+		<activity android:name=".ViewComment"
+                  android:label="@string/app_name">
+        </activity>
+		
+        <activity android:name=".AndroidThumbnailList"
+                  android:label="@string/app_name">
+        </activity>
+        
+        <activity android:name=".Upload"
+                  android:label="@string/app_name">
+            <intent-filter>
+                
+            </intent-filter>
+        </activity>
+        <activity android:name=".Comments"
+                  android:label="@string/app_name">
+            <intent-filter>
+                
+            </intent-filter>
+        </activity>
+        <activity android:name=".Download"
+                  android:label="@string/app_name">
+                   <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+                <!-- <category android:name="android.intent.category.DEFAULT" />-->
+            </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                       android:resource="@xml/searchable" />
+            <intent-filter>
+                
+            </intent-filter>
+        </activity>
+        <activity android:name=".UploadFile"
+                  android:label="@string/app_name">
+            <intent-filter>
+                
+            </intent-filter>
+        </activity>
+        <activity android:name=".Uploadmenu"
+                  android:label="@string/app_name">
+            <intent-filter>
+                
+            </intent-filter>
+        </activity>
+        <activity android:name=".SearchResult"
+                  android:label="@string/app_name">
+            <intent-filter>
+                
+            </intent-filter>
+        </activity>
+        <activity android:name=".TabOptions"
+                 android:label="@string/app_name">
+           
+        </activity>
+        <activity android:name=".NoteEdit"
+                  android:label="@string/app_name">
+            <intent-filter>
+                
+            </intent-filter>
+        </activity>
+        <activity android:name=".NotesDbAdapter"
+                  android:label="@string/app_name">
+            <intent-filter>
+                
+            </intent-filter>
+        </activity>
+        <activity android:name=".Play"
+                  android:label="@string/app_name">
+            <intent-filter>
+                
+            </intent-filter>
+        </activity>
+         <activity android:name=".VideoDownloaded"
+                  android:label="@string/app_name">
+            <intent-filter>
+                
+            </intent-filter>
+        </activity>
+         <activity android:name=".DisplayInfo"
+                  android:label="@string/app_name">
+            <intent-filter>
+                
+            </intent-filter>
+        </activity>
+        <activity android:name=".Video_thumnailsActivity"
+                  android:label="@string/app_name">
+                   <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+                <!-- <category android:name="android.intent.category.DEFAULT" />-->
+            </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                       android:resource="@xml/searchable" />
+            <intent-filter>
+                
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
