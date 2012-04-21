@@ -66,9 +66,10 @@ public class DisplayInfo extends Activity{
 		
 		public void download(String type,int rowid,String comments,String audio){
 		
+			try {
 			if(type.equalsIgnoreCase("0") || type.equalsIgnoreCase("3"))
 			{
-			try {
+			
 				String file=Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+title;
 				File f = new File(file);
 				long d=0;
@@ -133,27 +134,32 @@ public class DisplayInfo extends Activity{
                 dataOutputStream.writeBytes("File " + title +" received succesfully.\n");
                 dataOutputStream.flush();
                 bos.close();
-                message = "Video downloaded successfully";
 				mDbHelper.updateNote(rowid, title, desc, tags, comments, "1",audio,mNotesCursor.getString(7));
 				dataInputStream.close();
 				dataOutputStream.close();
 				socket.close();
+				runOnUiThread(new Runnable() {
+		            public void run() {
+		            	Toast.makeText(DisplayInfo.this, "Video downloaded successfully", Toast.LENGTH_LONG).show();
+		            }
+		        });
 				
+			
+			}
+			else{
+				runOnUiThread(new Runnable() {
+		            public void run() {
+		            	Toast.makeText(DisplayInfo.this, "Video already Downloaded", Toast.LENGTH_LONG).show();
+		            }
+		        });
+			}
+			
+			
+			
 			} catch (Exception e) {
 				  // TODO Auto-generated catch block
 				 //tv.setText(e.getMessage()+" Some connection Problem");
 			 }
-			}
-			else{
-				message="Video already Downloaded";
-			}
-			
-			
-			runOnUiThread(new Runnable() {
-	            public void run() {
-	            	Toast.makeText(DisplayInfo.this, message, Toast.LENGTH_LONG).show();
-	            }
-	        });
 			
 		}
 		public void displayfinal(View v,String message)
