@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.view.View;
 
 public class DisplayInfo extends Activity{
@@ -20,6 +21,7 @@ public class DisplayInfo extends Activity{
     DataInputStream dataInputStream = null;
     String title,desc,tags; Button download;
     private NotesDbAdapter mDbHelper;
+    String message ="";
     private Cursor mNotesCursor;
 	    /** Called when the activity is first created. */
 	    @Override
@@ -47,16 +49,32 @@ public class DisplayInfo extends Activity{
 		@Override
 		public void onClick(View arg0) {
 		 // TODO Auto-generated method stub
-			String message ="";
 			mNotesCursor = mDbHelper.searchName(title);
-			String type =mNotesCursor.getString(5);
-			int rowid= mNotesCursor.getInt(0);
-			String comments=mNotesCursor.getString(4);
-			String audio=mNotesCursor.getString(6);
-			if(type.equalsIgnoreCase("0"))
+			final String type =mNotesCursor.getString(5);
+			final int rowid= mNotesCursor.getInt(0);
+			final String comments=mNotesCursor.getString(4);
+			final String audio=mNotesCursor.getString(6);
+			mDbHelper.updateNote(rowid, title, desc, tags, comments, "3",audio,mNotesCursor.getString(7));
+			new Thread(new Runnable() {
+		        public void run() {    
+		        	download(type,rowid,comments,audio);
+		        }
+		    }).start();
+		 
+		}};
+		
+		
+		public void download(String type,int rowid,String comments,String audio){
+		
+			if(type.equalsIgnoreCase("0") || type.equalsIgnoreCase("3"))
 			{
 			try {
-				
+				String file=Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+title;
+				File f = new File(file);
+				long d=0;
+				if (f.exists())
+					d=f.length();
+				desc = d+"";
 				socket = new Socket("192.168.1.185", 2004);
 				dataOutputStream = new DataOutputStream(socket.getOutputStream());
 			  	dataInputStream = new DataInputStream(socket.getInputStream());
@@ -66,70 +84,78 @@ public class DisplayInfo extends Activity{
 		           			  "<Tags>"+tags+"</Tags><Time_stamp>"+"t"+"</Time_stamp>"+
 		                      "<Conference_stamp>"+"c"+"</Conference_stamp>"
 		                      +"<Function>download</Function>" + "</Message></root>\n";
-			  	//textIn.setText(dataInputStream.readUTF());
-			    
 			    dataOutputStream.writeBytes(msg);
 			    dataOutputStream.flush();
 			    String rec = dataInputStream.readLine();
-			    
-			    int size = Integer.parseInt(rec);
+			    long size = Long.parseLong(rec);
 			    int filesize = 5242880;
-			    if (size<=filesize)
-			    {
-			    	//download.setText(rec);
-			    	int bytesRead;
-				    int current = 0;
-				    byte [] mybytearray  = new byte [filesize];
-				    try{
-//				    	InputStream is = connection.getInputStream();
-				    	String file=Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+title;
-					    FileOutputStream fos = new FileOutputStream(file);
-					    BufferedOutputStream bos = new BufferedOutputStream(fos);
-					    bytesRead = dataInputStream.read(mybytearray,0,filesize);
-					    current = bytesRead;
-					    do {
-					      //System.out.println("neww");
-					      if(current>=size)
-					        break;
-					       bytesRead =
-					          dataInputStream.read(mybytearray, current, (mybytearray.length-current));
-					       if(bytesRead >= 0) current += bytesRead;
-					       //System.out.println("dsd");
-					    } while(bytesRead > -1);
-					    bos.write(mybytearray, 0 , current);
-					    bos.flush();
-                        //System.out.println("hereeeee011");
-                        dataOutputStream.writeBytes("File " + title +" received succesfully.\n");
-                        dataOutputStream.flush();
-                        bos.close();
-                        message = "Video downloaded successfully";
-					    //connection.close();
-				    }catch(IOException Exception){
-						tv.setText(Exception.getMessage());
-					}
-				    
-				    mDbHelper.updateNote(rowid, title, desc, tags, comments, "1",audio,mNotesCursor.getString(7));
-			    }
-			    else
-			    	{
-			    		message = "Video will be sent through USB keys";
-			    	}
+			    FileOutputStream fos;
+                if (f.exists())
+                    fos = new FileOutputStream(file,true);
+                else
+                    fos = new FileOutputStream(file);
+                BufferedOutputStream bos = new BufferedOutputStream(fos);
+                long t=0;
+                int bytesRead;
+    		    int current = 0;
+    		    byte [] mybytearray;
+                long loop = (size-d)/filesize;
+                long rem = (size-d)%filesize;
+                while(t<loop){
+                    mybytearray  = new byte [filesize];
+                    bytesRead = dataInputStream.read(mybytearray,0,filesize);
+				    current = bytesRead;
+				    do {
+				      if(current>=filesize)
+				        break;
+				       bytesRead =
+				    	   dataInputStream.read(mybytearray, current, (mybytearray.length-current));
+				       if(bytesRead >= 0) current += bytesRead;
+				    } while(bytesRead > -1);
+				    bos.write(mybytearray, 0 , current);
+				    bos.flush();
+				    t++;
+				    }
+                if(rem!=0){
+                    mybytearray  = new byte [filesize];
+                    bytesRead = dataInputStream.read(mybytearray,0,filesize);
+				    current = bytesRead;
+				    do {
+				      if(current>=size-t*filesize-d)
+				        break;
+				       bytesRead =
+				    	   dataInputStream.read(mybytearray, current, (mybytearray.length-current));
+				       if(bytesRead >= 0) current += bytesRead;
+				    } while(bytesRead > -1);
+                    bos.write(mybytearray, 0 , current);
+				    bos.flush();
+                }
+                dataOutputStream.writeBytes("File " + title +" received succesfully.\n");
+                dataOutputStream.flush();
+                bos.close();
+                message = "Video downloaded successfully";
+				mDbHelper.updateNote(rowid, title, desc, tags, comments, "1",audio,mNotesCursor.getString(7));
 				dataInputStream.close();
 				dataOutputStream.close();
 				socket.close();
 				
 			} catch (Exception e) {
 				  // TODO Auto-generated catch block
-				 tv.setText(e.getMessage()+" Some connection Problem");
+				 //tv.setText(e.getMessage()+" Some connection Problem");
 			 }
 			}
 			else{
 				message="Video already Downloaded";
 			}
-			displayfinal(arg0,message);
-		 
-		}};
-		
+			
+			
+			runOnUiThread(new Runnable() {
+	            public void run() {
+	            	Toast.makeText(DisplayInfo.this, message, Toast.LENGTH_LONG).show();
+	            }
+	        });
+			
+		}
 		public void displayfinal(View v,String message)
 		{
 			Intent foo = new Intent(this,VideoDownloaded.class);

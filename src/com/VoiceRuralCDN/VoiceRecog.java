@@ -1,6 +1,9 @@
 package com.VoiceRuralCDN;
 
 //import java.net.NetworkInterface;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.net.*;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
@@ -24,12 +28,17 @@ public class VoiceRecog extends Activity implements OnClickListener{
 	private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
     TextView tv,v1,v2,v3;
     Button b;
+    private NotesDbAdapter mDbHelper;
+    private Cursor mNotesCursor;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.interfaces);
+        
+        mDbHelper = new NotesDbAdapter(this);
+        mDbHelper.open();
         tv = (TextView) findViewById( R.id.tv1);
         b = (Button) findViewById(R.id.b2);
         v1 = (TextView) findViewById(R.id.up);
@@ -81,6 +90,15 @@ public class VoiceRecog extends Activity implements OnClickListener{
         AlertDialog alert = builder.create();
         alert.show();
     	}
+      
+      new Thread(new Runnable() {
+	        public void run() {    
+	        	String schema=getDBschema();
+	            syncSchema(schema);
+	            
+	        }
+	    }).start(); 
+      
     }
 
 	private void startVoiceRecognitionActivity() {
@@ -90,7 +108,55 @@ public class VoiceRecog extends Activity implements OnClickListener{
 	    intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speech recognition demo");
 	    startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);
 	}
-	
+	private void syncSchema(String schema){
+    	String[] arr = schema.split("@");
+    	for(int i=0;i<arr.length;i++){
+    		String [] arr1 = arr[i].split("#");
+    		Cursor cur =mDbHelper.searchName(arr1[0]);
+//    		String [] temp = arr1[4].split("~");
+//    		if(!temp[0].equals("default"))
+//    			for(int j=0;j<temp.length;j++)
+//    				temp[j] = temp[j]+" 0";
+//    		if(!temp[0].equals("default"))
+//    			arr1[4] = temp[0];
+//    		else
+//    			arr1[4] = "";
+//    		for(int j=1;j<temp.length;j++)
+//    			arr1[4] = arr1[4]+"~"+temp[j];
+    		if(cur!=null && cur.getCount()==0){
+    				mDbHelper.createNote(arr1[0], arr1[1], arr1[2], arr1[3],"0",arr1[5],arr1[4]);
+    		}
+    		else if(cur!=null && cur.getCount()==1){
+    			mDbHelper.updateNote(cur.getInt(0),arr1[0], arr1[1], arr1[2], arr1[3],cur.getString(5),arr1[5],arr1[4]);
+    		}
+    	}
+    }
+    private String getDBschema(){
+    	String response="";
+    	Socket socket = null;
+        DataOutputStream dataOutputStream = null;
+        DataInputStream dataInputStream = null;
+    	try {
+        socket = new Socket("192.168.1.185", 2004);
+
+	  		dataOutputStream = new DataOutputStream(socket.getOutputStream());
+		  	dataInputStream = new DataInputStream(socket.getInputStream());
+		  	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
+		  				  "<Message><size>1</size><fileName>efew</fileName>" +
+		  				  "<Title>efwe</Title><Desc>efwf</Desc>"+
+	           			  "<Tags>ewfw</Tags><Time_stamp>fewfw</Time_stamp>"+
+	                      "<Conference_stamp>ewfw</Conference_stamp>"
+	                      +"<Function>sync</Function>" + "</Message></root>\n";
+		    dataOutputStream.writeBytes(msg);
+		    dataOutputStream.flush();
+		    response =(dataInputStream.readLine());
+			dataInputStream.close();
+			dataOutputStream.close();
+			socket.close();
+    	}catch(Exception e){}
+	    
+    	return response;
+    }
 	@Override
 	public void onClick(View v) {
 		if (v.getId() == R.id.b2)

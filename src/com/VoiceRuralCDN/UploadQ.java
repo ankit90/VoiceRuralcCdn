@@ -18,7 +18,7 @@ import android.util.Log;
  * of using a collection of inner classes (which is less scalable and not
  * recommended).
  */
-public class NotesDbAdapter {
+public class UploadQ {
 
     public static final String KEY_TITLE = "title";
     public static final String KEY_DESCRIPTION = "body";
@@ -44,7 +44,7 @@ public class NotesDbAdapter {
 
     private static final String DATABASE_NAME = "data";
     private static final String DATABASE_TABLE = "notes";
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 6;
 
     private final Context mCtx;
 
@@ -75,7 +75,7 @@ public class NotesDbAdapter {
      * 
      * @param ctx the Context within which to work
      */
-    public NotesDbAdapter(Context ctx) {
+    public UploadQ(Context ctx) {
         this.mCtx = ctx;
     }
 
@@ -88,7 +88,7 @@ public class NotesDbAdapter {
      *         initialization call)
      * @throws SQLException if the database could be neither opened or created
      */
-    public NotesDbAdapter open() throws SQLException {
+    public UploadQ open() throws SQLException {
         mDbHelper = new DatabaseHelper(mCtx);
         mDb = mDbHelper.getWritableDatabase();
         return this;

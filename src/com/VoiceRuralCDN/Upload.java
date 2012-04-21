@@ -5,6 +5,7 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Environment;
 
@@ -25,6 +26,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 
 public class Upload extends Activity implements OnClickListener {
@@ -38,17 +40,19 @@ public class Upload extends Activity implements OnClickListener {
 	private String Video_desc;
 	private String Video_path;
 	TextView textIn;
-	Socket socket = null;
-    DataOutputStream dataOutputStream = null;
-    DataInputStream dataInputStream = null;
+	
     private TextView mDateDisplay;
+    private NotesDbAdapter mDbHelper;
+    private Cursor mNotesCursor;
     private int mYear;
     private int mMonth;
     private int mDay;
 
     static final int DATE_DIALOG_ID = 0;
     private TextView mTimeDisplay;
- 
+    Socket socket = null;
+    DataOutputStream dataOutputStream = null;
+    DataInputStream dataInputStream = null;
 
     private int mHour;
     private int mMinute;
@@ -60,6 +64,7 @@ public class Upload extends Activity implements OnClickListener {
 
     private TextView mFilePathTextView;
     private File selectedFile;
+    protected int filesize = 5242880;
 	/** Called when the activity is first created. */
 
 
@@ -67,7 +72,8 @@ public class Upload extends Activity implements OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.begin);
-        
+        mDbHelper = new NotesDbAdapter(this);
+	    mDbHelper.open();
         name = (EditText)findViewById(R.id.name);
         tags = (EditText)findViewById(R.id.tags);
         desc = (EditText)findViewById(R.id.body);
@@ -114,6 +120,7 @@ public class Upload extends Activity implements OnClickListener {
 
         // display the current date (this method is below)
         updateDisplay();
+        
 
     }
 
@@ -141,7 +148,7 @@ public class Upload extends Activity implements OnClickListener {
                     selectedFile = new File(data.getStringExtra(FilePickerActivity.EXTRA_FILE_PATH));
                     // Set the file path text view
                     path1=selectedFile.getPath();
-                    textIn.setText(path1);  
+                    //textIn.setText(path1);  
                     //Now you have your selected file, You can do your additional requirement with file.                
                 }
             }
@@ -206,26 +213,13 @@ protected Dialog onCreateDialog(int id) {
     }
     return null;
 }   
-
-
-
-    Button.OnClickListener buttonSendOnClickListener
-	 = new Button.OnClickListener(){
-
-	@Override
-	public void onClick(View arg0) {
-	 // TODO Auto-generated method stub
 	
-	 try {
-	    Video_name=name.getText().toString();
-	    Video_tags=tags.getText().toString();
-	    Video_desc=desc.getText().toString();
-	    Video_path=path1;
-	    
-	    socket = new Socket("192.168.1.185", 2004);
-		if(socket==null)
-			textIn.setText(" Could Not Connect to the host");
-		else{
+public void upload(//String Video_name,String Video_tags,String Video_desc,String Video_path,
+		String time){
+	try {
+		
+		socket = new Socket("192.168.1.185", 2004);
+		
 	    Date d = new Date();   
 	  	if(Video_path.equalsIgnoreCase(""))
 	    {
@@ -235,59 +229,123 @@ protected Dialog onCreateDialog(int id) {
 		  				  "<Message><size>1</size><fileName>"+Video_name+"</fileName>" +
 		  				  "<Title>"+Video_name+"</Title><Desc>"+Video_desc+"</Desc>"+
 	           			  "<Tags>"+Video_tags+"</Tags><Time_stamp>"+d.toString()+"</Time_stamp>"+
-	                      "<Conference_stamp>"+mHour+":"+mMinute+" "+mDay+"-"+mMonth+"-"+mYear+"</Conference_stamp>"
+	                      "<Conference_stamp>"+time+"</Conference_stamp>"
 	                      +"<Function>upload</Function>" + "</Message></root>\n";
 		  	//textIn.setText(dataInputStream.readUTF());
 		    
 		    dataOutputStream.writeBytes(msg);
 		    dataOutputStream.flush();
-		    textIn.setText(dataInputStream.readLine());
+		    
+		   
+			String confirmation=(dataInputStream.readLine());
+			Cursor c = mDbHelper.searchName(Video_name);
+			mDbHelper.updateNote(c.getInt(0), Video_name,Video_desc, Video_tags, "default", "0", "default",
+					 time);
 				
-				dataInputStream.close();
-				dataOutputStream.close();
-				socket.close();
+			dataInputStream.close();
+			dataOutputStream.close();
+			socket.close();
+			
+			runOnUiThread(new Runnable() {
+	            public void run() {
+	            	Toast.makeText(Upload.this, Video_name+" - Will be Uploaded by USB" , Toast.LENGTH_LONG).show();
+	            }
+	        });
 	    
 	    }
 	    else
 	    {
-	    	String mFileName =Video_path ;//Environment.getExternalStorageDirectory().getAbsolutePath();
-	        //mFileName += "/"+Video_path;
-	        //textIn.setText("Name "+mFileName);
+	    	String mFileName =Video_path ;
 		 	File myFile = new File (mFileName);
 		 	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
 			  "<Message><size>0</size><fileName>"+Video_name+"</fileName>" +
-			  "<Title>"+(int)myFile.length()+"</Title><Desc>"+Video_desc+"</Desc>"+
+			  "<Title>"+myFile.length()+"</Title><Desc>"+Video_desc+"</Desc>"+
  			  "<Tags>"+Video_tags+"</Tags><Time_stamp>"+d.toString()+"</Time_stamp>"+
-            "<Conference_stamp>"+mHour+":"+mMinute+" "+mDay+"-"+mMonth+"-"+mYear+"</Conference_stamp>"
+            "<Conference_stamp>"+time+"</Conference_stamp>"
             +"<Function>upload</Function>" +"</Message></root>\n";
-		    
-	        byte [] mybytearray  = new byte [(int)myFile.length()];
-	        FileInputStream fis = new FileInputStream(myFile);
-	        BufferedInputStream bis = new BufferedInputStream(fis);
-	        bis.read(mybytearray,0,mybytearray.length);
-	        
-	        dataOutputStream = new DataOutputStream(socket.getOutputStream());
+		 	dataOutputStream = new DataOutputStream(socket.getOutputStream());
 	        dataInputStream = new DataInputStream(socket.getInputStream());
-	        dataOutputStream.writeBytes(msg);
+	    	dataOutputStream.writeBytes(msg);
 		    dataOutputStream.flush();
-		    //textIn.setText(dataInputStream.readLine());
-		    //OutputStream os = socket.getOutputStream();
-	        //tecd xtIn.setText("Sending...");
-	        dataOutputStream.write(mybytearray,0,mybytearray.length);
-	        //dataOutputStream.writeBytes("\n");
-	        //textIn.setText("Sent...");
-	        dataOutputStream.flush();
-	        textIn.setText(dataInputStream.readLine());
+		    long downloaded_size = Long.parseLong(dataInputStream.readLine());
+		    long totalsize = myFile.length();
+		    long loop = (totalsize-downloaded_size)/(long)filesize;
+		    long rem = (totalsize-downloaded_size)%(long)filesize;
+		    FileInputStream fis = new FileInputStream(myFile);
+		    BufferedInputStream bis = new BufferedInputStream(fis);
+		    long l = downloaded_size/(long)filesize;
+		    long r = downloaded_size%(long)filesize;
+		    long t1=0;
+		    while(t1<l){
+		    	byte [] my  = new byte [filesize];
+			    bis.read(my,0,my.length);
+			    t1++;
+		    }
+		    if(r != 0){
+		    	byte [] my  = new byte [(int)(downloaded_size-t1*filesize)];
+			    bis.read(my,0,my.length);
+		    }
+		    long t=0;
+		    while(t<loop){
+		    	byte [] mybytearray  = new byte [filesize];
+		    	bis.read(mybytearray,0,mybytearray.length);
+		        dataOutputStream.write(mybytearray,0,mybytearray.length);
+		        dataOutputStream.flush();
+		        t++;
+		    }
+		    if(rem != 0){
+		    	byte [] mybytearray  = new byte [(int)(totalsize-downloaded_size-loop*filesize)];
+		    	bis.read(mybytearray,0,mybytearray.length);
+		        dataOutputStream.write(mybytearray,0,mybytearray.length);
+		        dataOutputStream.flush();
+		    }
+
+		    String confirmation=(dataInputStream.readLine());
+			Cursor c = mDbHelper.searchName(Video_name);
+			mDbHelper.updateNote(c.getInt(0), Video_name,Video_desc, Video_tags, "default", "0", "default",
+					 time);
+	        
 	        dataInputStream.close();
 			dataOutputStream.close();
 			//os.close();
 	        socket.close();
+	        runOnUiThread(new Runnable() {
+	            public void run() {
+	            	Toast.makeText(Upload.this, Video_name+" - has been Uploaded" , Toast.LENGTH_LONG).show();
+	            }
+	        });
+
+	        
 	    }
-	   }
-	 } catch (Exception e) {
-	  // TODO Auto-generated catch block
-		 textIn.setText(e.getMessage()+" Some connection Problem");
+	   
+	 } catch (final Exception e) {
+		 	
 	 }
+}
+	
+
+    Button.OnClickListener buttonSendOnClickListener
+	 = new Button.OnClickListener(){
+
+	@Override
+	public void onClick(View arg0) {
+	 // TODO Auto-generated method stub
+		//upload();
+		Video_name=name.getText().toString();
+	    Video_tags=tags.getText().toString();
+	    Video_desc=desc.getText().toString();
+	    Video_path=path1;
+		 mDbHelper.createNote(Video_name,Video_desc, Video_tags, "default", "2", "default",
+				 mHour+":"+mMinute+" "+mDay+"-"+mMonth+"-"+mYear);
+		 textIn.setText("Your Content has been Queued for Upload");
+		 
+		 new Thread(new Runnable() {
+		        public void run() {    
+		        	upload(//Video_name,Video_tags,Video_desc,Video_path,
+		        						mHour+":"+mMinute+" "+mDay+"-"+mMonth+"-"+mYear);
+		        }
+		    }).start();
+		 
 	}};
 	
 }
