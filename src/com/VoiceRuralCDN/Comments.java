@@ -122,7 +122,7 @@ public class Comments extends Activity implements OnClickListener{
 			  // TODO Auto-generated catch block
 		 }
 		
-        if(mNotesCursor!=null && mNotesCursor.getCount()!=0){
+        if(mNotesCursor.moveToFirst()){
         	if (mNotesCursor.getString(4).equalsIgnoreCase("default"))
         	mDbHelper.updateNote(mNotesCursor.getInt(0), mNotesCursor.getString(1),
         						 mNotesCursor.getString(2), mNotesCursor.getString(3),

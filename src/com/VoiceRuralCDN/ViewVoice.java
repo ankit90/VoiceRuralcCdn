@@ -6,10 +6,12 @@ import java.util.Properties;
 
 import android.app.Activity;
 import android.app.ListActivity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -19,6 +21,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class ViewVoice extends ListActivity{
 	Socket socket = null;
@@ -124,9 +127,20 @@ public class ViewVoice extends ListActivity{
     		file=Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+comments[position];
     	}
 
-    	Intent intent = new Intent(this,playComment.class);
-    	intent.putExtra("Voicename", file);
-    	startActivity(intent);
+    	try {
+
+            
+            Uri data = Uri.parse(file);
+            Intent intent = new Intent(Intent.ACTION_VIEW, data);
+           // Intent intent = new Intent(Intent.ACTION_VIEW, data);  
+            intent.setDataAndType(data, "video/3gpp");
+            startActivity(intent);
+      
+        } catch (Exception e) {
+            // TODO: handle exception
+        	Toast.makeText(ViewVoice.this, e.getMessage()+" Wrong" , Toast.LENGTH_LONG).show();
+        }
+
     }
 
 }

@@ -55,6 +55,8 @@ public class VoiceRecorderActivity extends Activity implements OnClickListener {
         rec.setOnClickListener(this);
         recstop.setOnClickListener(this);
         send.setOnClickListener(this);
+        mDbHelper = new NotesDbAdapter(this);
+        mDbHelper.open();
     }
     
     public void record(View v) throws IllegalStateException, IOException{
@@ -78,11 +80,11 @@ public class VoiceRecorderActivity extends Activity implements OnClickListener {
     public void stop(View v){
     	rec.setText("Start");
     	recstop.setText("Stoped");
-    	tv.setText("Your Comment has been recorded!! Press Submit comment to Submit your comment");
+    	tv.setText("Your Comment has been recorded!! Press Click Submit comment to Submit your comment");
     	recorder.stop();
     	recorder.release();
     	recorder = null;
-    	tv.setText("saved voice comment as " +mFileName);
+    	//tv.setText("saved voice comment as " +mFileName);
     }
 
     public void send(){
@@ -97,7 +99,6 @@ public class VoiceRecorderActivity extends Activity implements OnClickListener {
 			InputStream in = assetManager.open("config.properties");
 			Properties properties = new Properties();
 			properties.load(in);
-			final int filesize = Integer.parseInt(properties.getProperty("SizeLimit"));
 			socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
 			dataOutputStream = new DataOutputStream(socket.getOutputStream());
 		  	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
@@ -118,7 +119,8 @@ public class VoiceRecorderActivity extends Activity implements OnClickListener {
 	        dataOutputStream.write(mybytearray,0,mybytearray.length);
 	        
 	        DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-	        tv.setText(dataInputStream.readLine());
+	        String confirmation=dataInputStream.readLine();
+	        tv.setText("You Audio comment was successfully submitted");
 
 			dataOutputStream.close();
 			dataInputStream.close();
@@ -127,20 +129,20 @@ public class VoiceRecorderActivity extends Activity implements OnClickListener {
 			  // TODO Auto-generated catch block
 		 }
 		
-		mDbHelper = new NotesDbAdapter(this);
-        mDbHelper.open();
+		
         mNotesCursor =mDbHelper.searchName(temp[temp.length-1]);
-        if(mNotesCursor!=null && mNotesCursor.getCount()!=0){
+        
+        if(mNotesCursor.moveToFirst()){
         	if (mNotesCursor.getString(6).equalsIgnoreCase("default"))
         	mDbHelper.updateNote(mNotesCursor.getInt(0), mNotesCursor.getString(1),
         						 mNotesCursor.getString(2), mNotesCursor.getString(3),
-        						 temp1[temp1.length-1], mNotesCursor.getString(5)
-        						 ,mNotesCursor.getString(6),mNotesCursor.getString(7));
+        						 mNotesCursor.getString(4), mNotesCursor.getString(5)
+        						 ,temp1[temp1.length-1],mNotesCursor.getString(7));
         	else
         		mDbHelper.updateNote(mNotesCursor.getInt(0), mNotesCursor.getString(1),
 						 mNotesCursor.getString(2), mNotesCursor.getString(3),
-						 mNotesCursor.getString(4) + "~"+temp1[temp1.length-1], mNotesCursor.getString(5)
-						 ,mNotesCursor.getString(6),mNotesCursor.getString(7));
+						 mNotesCursor.getString(4) , mNotesCursor.getString(5)
+						 ,mNotesCursor.getString(6)+ "~"+temp1[temp1.length-1],mNotesCursor.getString(7));
         }
     }
 

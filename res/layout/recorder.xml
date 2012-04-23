@@ -9,7 +9,7 @@ android:weightSum="1">
 	android:orientation="horizontal"
 	android:layout_width="fill_parent"
 	android:gravity="center_horizontal"
-	android:paddingTop="400px" android:layout_height="54dp" android:weightSum="1" android:layout_weight="0.79">
+	android:paddingTop="400px" android:layout_height="54dp" android:weightSum="1" android:layout_weight="0.83">
     
     <Button android:layout_width="200px"
         android:layout_height="70px"
@@ -26,10 +26,15 @@ android:weightSum="1">
     <Button android:id="@+id/SendRecord"
         android:text="Submit Comment" android:layout_width="149dp"
         android:layout_height="wrap_content"/>
-  
-   
-    <TextView 
-    	android:id="@+id/RecordResult" android:layout_width="196dp" android:layout_height="17dp" android:layout_weight="0.17"/>
-    	      
+        
+        
+ <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="horizontal"
+	android:paddingTop="20px"
+	android:layout_width="fill_parent" android:layout_height="45dp" android:layout_weight="0.02">
+     
+  <TextView 
+    	android:id="@+id/RecordResult" android:layout_width="196dp" android:layout_weight="0.17" android:layout_height="match_parent"/>  	      
 
+</LinearLayout>
 </LinearLayout>
