@@ -74,7 +74,9 @@ android:layout_height="wrap_content" android:paddingTop="20px" android:paddingBo
 		
 		<LinearLayout android:orientation="horizontal"
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content" android:paddingTop="20px">
+		android:layout_height="wrap_content" android:paddingTop="20px"
+		android:paddingBottom="10px"		
+		 android:weightSum="1">
 				<TextView 
 				    android:layout_width="wrap_content"
 					android:layout_height="wrap_content" 
@@ -83,11 +85,10 @@ android:layout_height="wrap_content" android:paddingTop="20px" android:paddingBo
 				<Button 
 					android:text="Browse"
     				android:id="@+id/browse"
-    				android:layout_gravity="center_horizontal"
-				    android:layout_marginTop="25px"
+				    android:layout_marginLeft="75px"
 				    android:layout_width="wrap_content" 
 				    android:layout_height="60px"
-				    />
+				    android:layout_weight="0.34"/>
 		 </LinearLayout>
 		 <TextView 
 		    android:id="@+id/mb"
@@ -109,13 +110,26 @@ android:layout_height="wrap_content" android:paddingTop="20px" android:paddingBo
     android:layout_width="wrap_content" 
     android:layout_height="60px"
     />
-<Button android:text="Back to Home" android:layout_gravity="center_horizontal" android:id="@+id/button1" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+
+<LinearLayout android:orientation="vertical"
+android:layout_width="match_parent"
+android:gravity="right"
+android:paddingRight="10px"
+android:layout_height="wrap_content">
+
+<TextView android:text="Home" android:id="@+id/button1" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
+
+</LinearLayout>
+<LinearLayout android:orientation="vertical"
+android:layout_width="match_parent"
+android:layout_height="wrap_content">
+
 <TextView
  android:id="@+id/textin"
  android:layout_width="fill_parent"
- android:layout_height="wrap_content"
- android:layout_marginTop="35px"
- />
-
+ android:layout_marginTop="30px"
+ android:layout_height="wrap_content"/>
+ 
+</LinearLayout>
 </LinearLayout>
 

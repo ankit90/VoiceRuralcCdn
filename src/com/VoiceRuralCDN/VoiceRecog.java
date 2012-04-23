@@ -155,17 +155,7 @@ public class VoiceRecog extends Activity implements OnClickListener{
 						Properties properties = new Properties();
 						properties.load(in);
 						final int filesize = Integer.parseInt(properties.getProperty("SizeLimit"));
-						socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
-		    		
 						
-						if(socket==null){
-			    			runOnUiThread(new Runnable() {
-			    	            public void run() {
-			    	            	Toast.makeText(VoiceRecog.this,"No Network Connection", Toast.LENGTH_LONG).show();
-			    	            }
-			    	        });
-						}
-						else{
 								Date d = new Date();   
 		    	  	
 								String mFileName =Video_path ;
@@ -173,9 +163,20 @@ public class VoiceRecog extends Activity implements OnClickListener{
 								long totalsize = myFile.length();
 			    		 	
 								boolean flag= opportunistic_networking(totalsize,(long)filesize);
-			    		 	
+								
 								if(flag==true)
 								{
+									socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
+						    		
+									
+									if(socket==null){
+						    			runOnUiThread(new Runnable() {
+						    	            public void run() {
+						    	            	Toast.makeText(VoiceRecog.this,"No Network Connection", Toast.LENGTH_LONG).show();
+						    	            }
+						    	        });
+									}
+									else{
 				    		 	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
 				    			  "<Message><size>0</size><fileName>"+Video_name+"</fileName>" +
 				    			  "<Title>"+myFile.length()+"</Title><Desc>"+Video_desc+"</Desc>"+
@@ -228,19 +229,21 @@ public class VoiceRecog extends Activity implements OnClickListener{
 				    	            	Toast.makeText(VoiceRecog.this, Video_name+" - has been Uploaded" , Toast.LENGTH_LONG).show();
 				    	            }
 				    	        });
-				
+							}
 				    	    }
 								dataInputStream.close();
 				    			dataOutputStream.close();
 				    	        socket.close();
-		    	      }
+				    	        
+				    	        c.moveToNext();
+					    		count--;
+					    		Thread.sleep(100000);      
+    			}
 		    		
-					c.moveToNext();
-		    		count--;
-		    		Thread.sleep(100000);
+					
 		    		
 		    		}
-    		}
+    		
     	 } catch (final Exception e) {
     		 runOnUiThread(new Runnable() {
     	            public void run() {
@@ -262,9 +265,9 @@ public class VoiceRecog extends Activity implements OnClickListener{
 	      if (mobile == NetworkInfo.State.CONNECTED) {
 	    	    //mobile
 	    	  if(filesize<limit)
-	    		  return true;
+	    		  return false;
 	    	  else
-	    		  return true;
+	    		  return false;
 	    	  
 	    	} else if (wifi == NetworkInfo.State.CONNECTED) {
 	    	    //wifi
@@ -285,25 +288,25 @@ public class VoiceRecog extends Activity implements OnClickListener{
     			int count = c.getCount();
     			
     			while(count > 0){
-    			Socket socket = null;
-    		    DataOutputStream dataOutputStream = null;
-    		    DataInputStream dataInputStream = null;
-				final int rowid= c.getInt(0);
-				String title = c.getString(1); 
-				String desc = c.getString(2);
-				String tags = c.getString(3);
-				final String comments=c.getString(4);
-				final String type =c.getString(5);
-				final String audio=c.getString(6);
-					if(type.equalsIgnoreCase("0") || type.equalsIgnoreCase("3"))
-					{
+	    			Socket socket = null;
+	    		    DataOutputStream dataOutputStream = null;
+	    		    DataInputStream dataInputStream = null;
+					final int rowid= c.getInt(0);
+					String title = c.getString(1); 
+					String desc = c.getString(2);
+					String tags = c.getString(3);
+					final String comments=c.getString(4);
+					final String type =c.getString(5);
+					final String audio=c.getString(6);
 					
-						String file=Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+title;
-						File f = new File(file);
-						long d=0;
-						if (f.exists())
-							d=f.length();
-						desc = d+"";
+					String file=Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+title;
+					File f = new File(file);
+					long d=0;
+					String descc="";
+					if (f.exists())
+						d=f.length();
+					descc = d+"";
+						
 						Resources resources = this.getResources();
 						AssetManager assetManager = resources.getAssets();
 						// Read from the /assets directory
@@ -325,7 +328,7 @@ public class VoiceRecog extends Activity implements OnClickListener{
 					  	dataInputStream = new DataInputStream(socket.getInputStream());
 					  	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
 					  				  "<Message><size>1</size><fileName>"+"f"+"</fileName>" +
-					  				  "<Title>"+title+"</Title><Desc>"+desc+"</Desc>"+
+					  				  "<Title>"+title+"</Title><Desc>"+descc+"</Desc>"+
 				           			  "<Tags>"+tags+"</Tags><Time_stamp>"+"t"+"</Time_stamp>"+
 				                      "<Conference_stamp>"+"c"+"</Conference_stamp>"
 				                      +"<Function>download</Function>" + "</Message></root>\n";
@@ -334,88 +337,82 @@ public class VoiceRecog extends Activity implements OnClickListener{
 					    String rec = dataInputStream.readLine();
 					    long size = Long.parseLong(rec);
 					    boolean flag= opportunistic_networking(size,(long)filesize);
+					    dataOutputStream.writeBoolean(flag);
+					    dataOutputStream.flush();
+					    
 					    if(flag==true){
 					    	
-					    FileOutputStream fos;
-		                if (f.exists())
-		                    fos = new FileOutputStream(file,true);
-		                else
-		                    fos = new FileOutputStream(file);
-		                BufferedOutputStream bos = new BufferedOutputStream(fos);
-		                long t=0;
-		                int bytesRead;
-		    		    int current = 0;
-		    		    byte [] mybytearray;
-		                long loop = (size-d)/filesize;
-		                long rem = (size-d)%filesize;
-		                while(t<loop){
-		                    mybytearray  = new byte [filesize];
-		                    bytesRead = dataInputStream.read(mybytearray,0,filesize);
-						    current = bytesRead;
-						    do {
-						      if(current>=filesize)
-						        break;
-						       bytesRead =
-						    	   dataInputStream.read(mybytearray, current, (mybytearray.length-current));
-						       if(bytesRead >= 0) current += bytesRead;
-						    } while(bytesRead > -1);
-						    bos.write(mybytearray, 0 , current);
-						    bos.flush();
-						    t++;
-						    }
-		                if(rem!=0){
-		                    mybytearray  = new byte [filesize];
-		                    bytesRead = dataInputStream.read(mybytearray,0,filesize);
-						    current = bytesRead;
-						    do {
-						      if(current>=size-t*filesize-d)
-						        break;
-						       bytesRead =
-						    	   dataInputStream.read(mybytearray, current, (mybytearray.length-current));
-						       if(bytesRead >= 0) current += bytesRead;
-						    } while(bytesRead > -1);
-		                    bos.write(mybytearray, 0 , current);
-						    bos.flush();
-		                }
-		                dataOutputStream.writeBytes("File " + title +" received succesfully.\n");
-		                dataOutputStream.flush();
-		                bos.close();
-						mDbHelper.updateNote(rowid, title, desc, tags, comments, "1",audio,c.getString(7));
-						dataInputStream.close();
-						dataOutputStream.close();
-						socket.close();
-						runOnUiThread(new Runnable() {
-				            public void run() {
-				            	Toast.makeText(VoiceRecog.this, "Video downloaded successfully", Toast.LENGTH_LONG).show();
-				            }
-				        });
+							    FileOutputStream fos;
+				                if (f.exists())
+				                    fos = new FileOutputStream(file,true);
+				                else
+				                    fos = new FileOutputStream(file);
+				                BufferedOutputStream bos = new BufferedOutputStream(fos);
+				                long t=0;
+				                int bytesRead;
+				    		    int current = 0;
+				    		    byte [] mybytearray;
+				                long loop = (size-d)/filesize;
+				                long rem = (size-d)%filesize;
+				                while(t<loop){
+				                    mybytearray  = new byte [filesize];
+				                    bytesRead = dataInputStream.read(mybytearray,0,filesize);
+								    current = bytesRead;
+								    do {
+								      if(current>=filesize)
+								        break;
+								       bytesRead =
+								    	   dataInputStream.read(mybytearray, current, (mybytearray.length-current));
+								       if(bytesRead >= 0) current += bytesRead;
+								    } while(bytesRead > -1);
+								    bos.write(mybytearray, 0 , current);
+								    bos.flush();
+								    t++;
+								    }
+				                if(rem!=0){
+				                    mybytearray  = new byte [filesize];
+				                    bytesRead = dataInputStream.read(mybytearray,0,filesize);
+								    current = bytesRead;
+								    do {
+								      if(current>=size-t*filesize-d)
+								        break;
+								       bytesRead =
+								    	   dataInputStream.read(mybytearray, current, (mybytearray.length-current));
+								       if(bytesRead >= 0) current += bytesRead;
+								    } while(bytesRead > -1);
+				                    bos.write(mybytearray, 0 , current);
+								    bos.flush();
+				                }
+				                dataOutputStream.writeBytes("File " + title +" received succesfully.\n");
+				                dataOutputStream.flush();
+				                bos.close();
+								mDbHelper.updateNote(rowid, title, desc, tags, comments, "1",audio,c.getString(7));
+								
+								runOnUiThread(new Runnable() {
+						            public void run() {
+						            	Toast.makeText(VoiceRecog.this, "Video downloaded successfully", Toast.LENGTH_LONG).show();
+						            }
+						        });
 					   }
-					    else{
+					    
 					    	dataInputStream.close();
 							dataOutputStream.close();
 							socket.close();
-					    }
+					    
 					  }
-					}
-					else{
-						runOnUiThread(new Runnable() {
-				            public void run() {
-				            	Toast.makeText(VoiceRecog.this, "Video already Downloaded", Toast.LENGTH_LONG).show();
-				            }
-				        });
-					}
+					
 					count--;
 					c.moveToNext();
 					Thread.sleep(10000);
 					
     				}
     				}
-					} catch (final Exception e) {
+					} catch (Exception e) {
 						  // TODO Auto-generated catch block
 						 //tv.setText(e.getMessage()+" Some connection Problem");
 						runOnUiThread(new Runnable() {
 				            public void run() {
-				            	Toast.makeText(VoiceRecog.this, e.getMessage(), Toast.LENGTH_LONG).show();
+				            	Toast.makeText(VoiceRecog.this, "Network Problem", Toast.LENGTH_LONG).show();
 				            }
 				        });
 					 }
@@ -442,11 +439,11 @@ public class VoiceRecog extends Activity implements OnClickListener{
 //    			arr1[4] = "";
 //    		for(int j=1;j<temp.length;j++)
 //    			arr1[4] = arr1[4]+"~"+temp[j];
-    		if(cur!=null && cur.getCount()==0){
+    		if(!cur.moveToFirst()){
     				mDbHelper.createNote(arr1[0], arr1[1], arr1[2], arr1[3],"0",arr1[5],arr1[4]);
     		}
-    		else if(cur!=null && cur.getCount()==1 && cur.getString(4).equalsIgnoreCase("1")||
-    				cur.getString(4).equalsIgnoreCase("1")){
+    		else if(cur!=null && (cur.getString(5).equalsIgnoreCase("1")||
+    				cur.getString(5).equalsIgnoreCase("0"))){
     			mDbHelper.updateNote(cur.getInt(0),arr1[0], arr1[1], arr1[2], arr1[3],cur.getString(5),arr1[5],arr1[4]);
     		}
     	}

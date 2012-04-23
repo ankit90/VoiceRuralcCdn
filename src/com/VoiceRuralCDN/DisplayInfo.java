@@ -81,7 +81,15 @@ public class DisplayInfo extends Activity{
 		        }
 		    }).start();
 			
-			tv.setText("Your video has been queued for download !!");		 
+			tv.setText("Your video has been queued for download !!");
+//			Intent intent = new Intent(Intent.ACTION_EDIT);
+//	        intent.setType("vnd.android.cursor.item/event");
+//	        //intent.putExtra("beginTime", d1.getSeconds()*1000);
+//	        intent.putExtra("allDay", true);
+//	        intent.putExtra("rrule", "FREQ=YEARLY");
+//	        //intent.putExtra("endTime", (d1.getSeconds()*1000)+(60*60*1000));
+//	        intent.putExtra("title", "Conference for Video : "+title);
+//	        startActivity(intent);
 		}};
 		
 		
@@ -96,10 +104,12 @@ public class DisplayInfo extends Activity{
 				
 				String file=Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+title;
 				File f = new File(file);
+				String descc="";
 				long d=0;
 				if (f.exists())
 					d=f.length();
-				desc = d+"";
+				descc = d+"";
+				
 				Resources resources = this.getResources();
 				AssetManager assetManager = resources.getAssets();
 				// Read from the /assets directory
@@ -121,7 +131,7 @@ public class DisplayInfo extends Activity{
 			  	dataInputStream = new DataInputStream(socket.getInputStream());
 			  	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
 			  				  "<Message><size>1</size><fileName>"+"f"+"</fileName>" +
-			  				  "<Title>"+title+"</Title><Desc>"+desc+"</Desc>"+
+			  				  "<Title>"+title+"</Title><Desc>"+descc+"</Desc>"+
 		           			  "<Tags>"+tags+"</Tags><Time_stamp>"+"t"+"</Time_stamp>"+
 		                      "<Conference_stamp>"+"c"+"</Conference_stamp>"
 		                      +"<Function>download</Function>" + "</Message></root>\n";
@@ -131,6 +141,7 @@ public class DisplayInfo extends Activity{
 			    long size = Long.parseLong(rec);
 			    boolean flag=opportunistic_networking(size,(long)filesize);
 			    dataOutputStream.writeBoolean(flag);
+			    dataOutputStream.flush();
 			    if(flag==true){
 			    	
 			    FileOutputStream fos;
@@ -202,12 +213,12 @@ public class DisplayInfo extends Activity{
 		        });
 			}
 			
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				  // TODO Auto-generated catch block
 				 //tv.setText(e.getMessage()+" Some connection Problem");
 				runOnUiThread(new Runnable() {
 		            public void run() {
-		            	Toast.makeText(DisplayInfo.this, "Some Exception", Toast.LENGTH_LONG).show();
+		            	Toast.makeText(DisplayInfo.this, e.getMessage(), Toast.LENGTH_LONG).show();
 		            }
 		        });
 			 }
@@ -226,9 +237,9 @@ public class DisplayInfo extends Activity{
 		      if (mobile == NetworkInfo.State.CONNECTED) {
 		    	    //mobile
 		    	  if(filesize<limit)
-		    		  return true;
+		    		  return false;
 		    	  else
-		    		  return true;
+		    		  return false;
 		    	  
 		    	} else if (wifi == NetworkInfo.State.CONNECTED) {
 		    	    //wifi

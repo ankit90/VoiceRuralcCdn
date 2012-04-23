@@ -46,7 +46,7 @@ public class Upload extends Activity implements OnClickListener {
 	private String Video_path;
 	TextView textIn;
 	
-    private TextView mDateDisplay;
+    private TextView mDateDisplay,home;
     private NotesDbAdapter mDbHelper;
     private int mYear;
     private int mMonth;
@@ -62,7 +62,7 @@ public class Upload extends Activity implements OnClickListener {
     private int mMinute;
 
     static final int TIME_DIALOG_ID = 1;
-    private Button mStartActivityButton,home;
+    private Button mStartActivityButton;
     private static final int REQUEST_PICK_FILE = 1;
     String path1="";
 
@@ -83,7 +83,7 @@ public class Upload extends Activity implements OnClickListener {
         //path = (EditText)findViewById(R.id.path);
         mStartActivityButton = (Button)findViewById(R.id.browse);
         Button buttonSend = (Button)findViewById(R.id.send);
-        home = (Button)findViewById(R.id.button1);
+        home = (TextView)findViewById(R.id.button1);
         textIn = (TextView)findViewById(R.id.textin);
         buttonSend.setOnClickListener(buttonSendOnClickListener);
         home.setOnClickListener(this);
@@ -228,18 +228,22 @@ public void upload(//String Video_name,String Video_tags,String Video_desc,Strin
 		Properties properties = new Properties();
 		properties.load(in);
 		final int filesize = Integer.parseInt(properties.getProperty("SizeLimit"));
-		socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
-		if(socket==null){
-			runOnUiThread(new Runnable() {
-	            public void run() {
-	            	Toast.makeText(Upload.this,"No Network Connection", Toast.LENGTH_LONG).show();
-	            }
-	        });
-		}
-		else{
+		String server=properties.getProperty("ServerIp");
+		int port =Integer.parseInt(properties.getProperty("ServerPort"));
+		
+		
 		Date d = new Date();   
 	  	if(Video_path.equalsIgnoreCase(""))
 	    {
+	  		socket = new Socket(server,port);
+	  		if(socket==null){
+				runOnUiThread(new Runnable() {
+		            public void run() {
+		            	Toast.makeText(Upload.this,"No Network Connection", Toast.LENGTH_LONG).show();
+		            }
+		        });
+			}
+			else{
 	  		dataOutputStream = new DataOutputStream(socket.getOutputStream());
 		  	dataInputStream = new DataInputStream(socket.getInputStream());
 		  	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
@@ -268,7 +272,7 @@ public void upload(//String Video_name,String Video_tags,String Video_desc,Strin
 	            	Toast.makeText(Upload.this, Video_name+" - Will be Uploaded by USB" , Toast.LENGTH_LONG).show();
 	            }
 	        });
-	    
+			}
 	    }
 	    else
 	    {
@@ -279,6 +283,15 @@ public void upload(//String Video_name,String Video_tags,String Video_desc,Strin
 		 	boolean flag= opportunistic_networking(totalsize,(long)filesize);
 		 	if(flag==true)
 		 	{
+		 		socket = new Socket(server,port);
+		  		if(socket==null){
+					runOnUiThread(new Runnable() {
+			            public void run() {
+			            	Toast.makeText(Upload.this,"No Network Connection", Toast.LENGTH_LONG).show();
+			            }
+			        });
+				}
+				else{	
 		 	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
 			  "<Message><size>0</size><fileName>"+Video_name+"</fileName>" +
 			  "<Title>"+myFile.length()+"</Title><Desc>"+Video_desc+"</Desc>"+
@@ -335,10 +348,10 @@ public void upload(//String Video_name,String Video_tags,String Video_desc,Strin
 	            	Toast.makeText(Upload.this, Video_name+" - has been Uploaded" , Toast.LENGTH_LONG).show();
 	            }
 	        });
-
+			}
 	    	}
 	      }
-	    }
+	    
 	   
 	 } catch (final Exception e) {
 		 runOnUiThread(new Runnable() {
@@ -361,9 +374,9 @@ public boolean opportunistic_networking(long filesize,long limit){
      if (mobile == NetworkInfo.State.CONNECTED) {
    	    //mobile
    	  if(filesize<limit)
-   		  return true;
+   		  return false;
    	  else
-   		  return true;
+   		  return false;
    	  
    	} else if (wifi == NetworkInfo.State.CONNECTED) {
    	    //wifi
@@ -389,13 +402,23 @@ public boolean opportunistic_networking(long filesize,long limit){
 		 mDbHelper.createNote(Video_name,Video_desc, Video_tags, Video_path, "2", "default",
 				 mHour+":"+mMinute+" "+mDay+"-"+mMonth+"-"+mYear);
 		 textIn.setText("Your Content has been Queued for Upload");
-		 
 		 new Thread(new Runnable() {
 		        public void run() {    
 		        	upload(//Video_name,Video_tags,Video_desc,Video_path,
 		        						mHour+":"+mMinute+" "+mDay+"-"+mMonth+"-"+mYear);
 		        }
 		    }).start();
+		 
+		 	//Calendar cal = Calendar.getInstance();
+		 	//Date d1 = new Date(mYear,mMonth,mDay,mHour,mMinute);
+	        Intent intent = new Intent(Intent.ACTION_EDIT);
+	        intent.setType("vnd.android.cursor.item/event");
+	        //intent.putExtra("beginTime", d1.getSeconds()*1000);
+	        intent.putExtra("allDay", true);
+	        intent.putExtra("rrule", "FREQ=YEARLY");
+	        //intent.putExtra("endTime", (d1.getSeconds()*1000)+(60*60*1000));
+	        intent.putExtra("title", "Conference for Video : "+Video_name);
+	        startActivity(intent);
 		 
 	}};
 	

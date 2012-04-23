@@ -31,9 +31,14 @@ public class Conference extends ListActivity{
         setContentView(R.layout.conf_list);
         mDbHelper = new NotesDbAdapter(this);
         mDbHelper.open();
-        mNotesCursor = mDbHelper.searchName("");
-        int rows = mNotesCursor.getCount();
+        mNotesCursor = mDbHelper.getDownloaded();
+        
+
+        if(mNotesCursor.moveToFirst())
+        {
+        	int rows = mNotesCursor.getCount();
         while(rows>0){
+        
         	String time=mNotesCursor.getString(7);
         	String [] arr=time.split(" ");
         	String [] arr1=arr[0].split(":");
@@ -46,13 +51,14 @@ public class Conference extends ListActivity{
         						Integer.parseInt(arr1[1]));
         	Date d1 = new Date(mYear,mMonth,mDay,mHour,mMinute);
         	
-        	Toast.makeText(this, mYear + " "+mMonth + " "+mDay + " "+mHour + " "+mMinute , Toast.LENGTH_LONG).show();
+        	//Toast.makeText(this, mYear + " "+mMonth + " "+mDay + " "+mHour + " "+mMinute , Toast.LENGTH_LONG).show();
         	//arr2[2] +" " + arr2[1] +" " +arr2[0] +" "+arr1[0] +" "+arr1[1]
         	int sec = (int)(((d1.getTime()-d.getTime()))/(1000*60));
         	if (sec <60 && sec >=0)
         		v.add(mNotesCursor.getString(1));
         	rows--;
         	mNotesCursor.moveToNext();
+        }
         }
         videoFileList = new String[v.size()];
         for(int i=0;i<v.size();i++)
@@ -80,7 +86,8 @@ public class Conference extends ListActivity{
 		super.onListItemClick(l, v, position, id);
 		String selection = l.getItemAtPosition(position).toString();
 		//Toast.makeText(this, selection, Toast.LENGTH_LONG).show();
-		Intent foo = new Intent(this,SIP.class);
-		startActivity(foo);
+//		Intent foo = new Intent(this,SIP.class);
+//		startActivity(foo);
+		
 	}
 }

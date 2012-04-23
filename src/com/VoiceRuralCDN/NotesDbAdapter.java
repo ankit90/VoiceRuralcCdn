@@ -148,6 +148,11 @@ public class NotesDbAdapter {
         return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_TITLE,
                 KEY_DESCRIPTION, KEY_TAGS, KEY_COMMENTS, KEY_TYPE,KEY_VOICE, KEY_CONFTIME}, KEY_TYPE +" like " + "'%"+"3"+"%'", null, null, null, null);
     }
+    public Cursor getDownloaded(){
+
+        return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_TITLE,
+                KEY_DESCRIPTION, KEY_TAGS, KEY_COMMENTS, KEY_TYPE,KEY_VOICE, KEY_CONFTIME}, KEY_TYPE +" like " + "'%"+"1"+"%'", null, null, null, null);
+    }
     public Cursor getUploadQueue(){
 
         return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_TITLE,
