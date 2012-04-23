@@ -3,22 +3,30 @@ package com.VoiceRuralCDN;
 import android.app.Activity;
 import java.io.*;
 import java.net.Socket;
+import java.util.Properties;
+
 import android.content.Intent;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 public class Comments extends Activity implements OnClickListener{
-	private Button recordComment,playButton,voiceComment,comments,submit,back;
+	private Button recordComment,playButton,voiceComment,comments,submit;
+	TextView back,title,tags,desc,conf;
+	
 	private EditText edittext;
 	Socket socket = null;
     DataOutputStream dataOutputStream = null;
 	String name="";
 	private NotesDbAdapter mDbHelper;
     private Cursor mNotesCursor;
+    String [] temp;
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,7 +39,11 @@ public class Comments extends Activity implements OnClickListener{
         voiceComment = (Button) findViewById(R.id.voice);
         comments = (Button) findViewById(R.id.comm);
         submit = (Button) findViewById(R.id.submit);
-        back = (Button) findViewById(R.id.back);
+        back = (TextView) findViewById(R.id.back);
+        title = (TextView) findViewById(R.id.title);
+        conf = (TextView) findViewById(R.id.conf);
+        desc = (TextView) findViewById(R.id.desc);
+        tags = (TextView) findViewById(R.id.tags);
         
         edittext = (EditText) findViewById(R.id.text);
         
@@ -41,6 +53,15 @@ public class Comments extends Activity implements OnClickListener{
         comments.setOnClickListener(this);
         submit.setOnClickListener(this);
         back.setOnClickListener(this);
+        
+        mDbHelper = new NotesDbAdapter(this);
+        mDbHelper.open();
+        temp = name.split("/");
+        mNotesCursor =mDbHelper.searchName(temp[temp.length-1]);
+        title.setText(mNotesCursor.getString(1));
+        desc.setText(mNotesCursor.getString(2));
+        tags.setText(mNotesCursor.getString(3));
+        conf.setText(mNotesCursor.getString(7));
         
 	}
 	
@@ -75,9 +96,15 @@ public class Comments extends Activity implements OnClickListener{
 	private void comment(){
 		String comment = edittext.getText().toString();
 		if (!comment.equalsIgnoreCase("")){
-		String [] temp = name.split("/");
+		
 		try{
-			socket = new Socket("192.168.1.185", 2004);
+			Resources resources = this.getResources();
+			AssetManager assetManager = resources.getAssets();
+			// Read from the /assets directory
+			InputStream in = assetManager.open("config.properties");
+			Properties properties = new Properties();
+			properties.load(in);
+			socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
 			dataOutputStream = new DataOutputStream(socket.getOutputStream());
 		  	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
 		  				  "<Message><size>1</size><fileName>"+"f"+"</fileName>" +
@@ -94,9 +121,7 @@ public class Comments extends Activity implements OnClickListener{
 		} catch (Exception e) {
 			  // TODO Auto-generated catch block
 		 }
-		mDbHelper = new NotesDbAdapter(this);
-        mDbHelper.open();
-        mNotesCursor =mDbHelper.searchName(temp[temp.length-1]);
+		
         if(mNotesCursor!=null && mNotesCursor.getCount()!=0){
         	if (mNotesCursor.getString(4).equalsIgnoreCase("default"))
         	mDbHelper.updateNote(mNotesCursor.getInt(0), mNotesCursor.getString(1),

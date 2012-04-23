@@ -67,7 +67,7 @@ public class SIP extends Activity{
         	   }
         	};
         	String sipAddress ="sip:anupam90@sip2sip.info";
-           SipAudioCall call = mSipManager.makeAudioCall(mSipProfile.getUriString(), sipAddress, listener, 30);
+          mSipManager.makeAudioCall(mSipProfile.getUriString(), sipAddress, listener, 30);
         
         }catch(Exception e){}
         

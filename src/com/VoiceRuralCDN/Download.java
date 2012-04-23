@@ -1,8 +1,5 @@
 package com.VoiceRuralCDN;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.net.Socket;
 
 import android.app.ListActivity;
 import android.app.SearchManager;
@@ -22,8 +19,6 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class Download extends ListActivity {
-    private static final int ACTIVITY_CREATE=0;
-    private static final int ACTIVITY_EDIT=1;
     TextView tv;
     private static final int INSERT_ID = Menu.FIRST;
     private static final int DELETE_ID = Menu.FIRST + 1;
@@ -115,14 +110,18 @@ public class Download extends ListActivity {
         String title = c.getString(c.getColumnIndexOrThrow(NotesDbAdapter.KEY_TITLE));
         String desc = c.getString(c.getColumnIndexOrThrow(NotesDbAdapter.KEY_DESCRIPTION));
         String tags = c.getString(c.getColumnIndexOrThrow(NotesDbAdapter.KEY_TAGS));
-        displayInfo(v,title,desc,tags);
+        String conf = c.getString(c.getColumnIndexOrThrow(NotesDbAdapter.KEY_CONFTIME));
+        String comm = c.getString(c.getColumnIndexOrThrow(NotesDbAdapter.KEY_COMMENTS));
+        displayInfo(v,title,desc,tags,conf,comm);
     }
 
-    public void displayInfo(View v,String title, String desc, String tags){
+    public void displayInfo(View v,String title, String desc, String tags,String conf,String comm){
     	Intent foo = new Intent(this, DisplayInfo.class);
     	foo.putExtra("TITLE",title);
     	foo.putExtra("DESC", desc);
     	foo.putExtra("TAGS", tags);
+    	foo.putExtra("CONF", conf);
+    	foo.putExtra("COMM", comm);
     	startActivity(foo);
     }
 

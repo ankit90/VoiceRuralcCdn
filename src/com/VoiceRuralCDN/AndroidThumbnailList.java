@@ -2,7 +2,6 @@ package com.VoiceRuralCDN;
 
 import java.util.Vector;
 
-import org.w3c.dom.Text;
 
 import android.app.ListActivity;
 import android.content.Context;
@@ -17,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 

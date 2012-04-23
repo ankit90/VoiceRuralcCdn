@@ -6,10 +6,14 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import android.app.Activity;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -20,6 +24,8 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import java.util.Random;
 
 public class VoiceRecorderActivity extends Activity implements OnClickListener {
@@ -52,6 +58,8 @@ public class VoiceRecorderActivity extends Activity implements OnClickListener {
     }
     
     public void record(View v) throws IllegalStateException, IOException{
+    	rec.setText("Recording");
+    	Toast.makeText(VoiceRecorderActivity.this,"Speak", Toast.LENGTH_LONG).show();
     	recorder=new MediaRecorder();
     	recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
     	recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -68,6 +76,9 @@ public class VoiceRecorderActivity extends Activity implements OnClickListener {
     }
     
     public void stop(View v){
+    	rec.setText("Start");
+    	recstop.setText("Stoped");
+    	tv.setText("Your Comment has been recorded!! Press Submit comment to Submit your comment");
     	recorder.stop();
     	recorder.release();
     	recorder = null;
@@ -79,7 +90,15 @@ public class VoiceRecorderActivity extends Activity implements OnClickListener {
     	String [] temp1 = mFileName.split("/");
     	File myFile = new File (mFileName);
     	try{
-			socket = new Socket("192.168.1.185", 2004);
+			// Read from the /assets directory
+			Resources resources = this.getResources();
+			AssetManager assetManager = resources.getAssets();
+			// Read from the /assets directory
+			InputStream in = assetManager.open("config.properties");
+			Properties properties = new Properties();
+			properties.load(in);
+			final int filesize = Integer.parseInt(properties.getProperty("SizeLimit"));
+			socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
 			dataOutputStream = new DataOutputStream(socket.getOutputStream());
 		  	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
 		  				  "<Message><size>1</size><fileName>"+"f"+"</fileName>" +
@@ -132,12 +151,8 @@ public class VoiceRecorderActivity extends Activity implements OnClickListener {
 		case R.id.StartRecord:
 			try {
 				record(v);
-			} catch (IllegalStateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (Exception e) {
+				
 			}
 			break;
 		case R.id.StopRecord:

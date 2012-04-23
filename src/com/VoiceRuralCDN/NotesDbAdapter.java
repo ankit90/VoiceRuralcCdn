@@ -44,7 +44,7 @@ public class NotesDbAdapter {
 
     private static final String DATABASE_NAME = "data";
     private static final String DATABASE_TABLE = "notes";
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 9;
 
     private final Context mCtx;
 
@@ -141,7 +141,17 @@ public class NotesDbAdapter {
     public Cursor fetchAllNotes() {
 
         return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_TITLE,
-                KEY_DESCRIPTION, KEY_TAGS, KEY_COMMENTS, KEY_TYPE,KEY_VOICE, KEY_CONFTIME}, null, null, null, null, null);
+                KEY_DESCRIPTION, KEY_TAGS, KEY_COMMENTS, KEY_TYPE,KEY_VOICE, KEY_CONFTIME}, KEY_TYPE +" like " + "'%"+"0"+"%'", null, null, null, null);
+    }
+    public Cursor getDownloadQueue(){
+
+        return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_TITLE,
+                KEY_DESCRIPTION, KEY_TAGS, KEY_COMMENTS, KEY_TYPE,KEY_VOICE, KEY_CONFTIME}, KEY_TYPE +" like " + "'%"+"3"+"%'", null, null, null, null);
+    }
+    public Cursor getUploadQueue(){
+
+        return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_TITLE,
+                KEY_DESCRIPTION, KEY_TAGS, KEY_COMMENTS, KEY_TYPE,KEY_VOICE, KEY_CONFTIME}, KEY_TYPE +" like " + "'%"+"2"+"%'", null, null, null, null);
     }
     
     public Cursor searchByTag(String s) {

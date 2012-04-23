@@ -4,15 +4,20 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Environment;
 
 import java.io.*;
 import java.net.*;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Properties;
 
 
 //import com.browsing.R;
@@ -43,7 +48,6 @@ public class Upload extends Activity implements OnClickListener {
 	
     private TextView mDateDisplay;
     private NotesDbAdapter mDbHelper;
-    private Cursor mNotesCursor;
     private int mYear;
     private int mMonth;
     private int mDay;
@@ -62,9 +66,8 @@ public class Upload extends Activity implements OnClickListener {
     private static final int REQUEST_PICK_FILE = 1;
     String path1="";
 
-    private TextView mFilePathTextView;
+  
     private File selectedFile;
-    protected int filesize = 5242880;
 	/** Called when the activity is first created. */
 
 
@@ -218,9 +221,23 @@ public void upload(//String Video_name,String Video_tags,String Video_desc,Strin
 		String time){
 	try {
 		
-		socket = new Socket("192.168.1.185", 2004);
-		
-	    Date d = new Date();   
+		Resources resources = this.getResources();
+		AssetManager assetManager = resources.getAssets();
+		// Read from the /assets directory
+		InputStream in = assetManager.open("config.properties");
+		Properties properties = new Properties();
+		properties.load(in);
+		final int filesize = Integer.parseInt(properties.getProperty("SizeLimit"));
+		socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
+		if(socket==null){
+			runOnUiThread(new Runnable() {
+	            public void run() {
+	            	Toast.makeText(Upload.this,"No Network Connection", Toast.LENGTH_LONG).show();
+	            }
+	        });
+		}
+		else{
+		Date d = new Date();   
 	  	if(Video_path.equalsIgnoreCase(""))
 	    {
 	  		dataOutputStream = new DataOutputStream(socket.getOutputStream());
@@ -257,6 +274,11 @@ public void upload(//String Video_name,String Video_tags,String Video_desc,Strin
 	    {
 	    	String mFileName =Video_path ;
 		 	File myFile = new File (mFileName);
+		 	long totalsize = myFile.length();
+		 	
+		 	boolean flag= opportunistic_networking(totalsize,(long)filesize);
+		 	if(flag==true)
+		 	{
 		 	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
 			  "<Message><size>0</size><fileName>"+Video_name+"</fileName>" +
 			  "<Title>"+myFile.length()+"</Title><Desc>"+Video_desc+"</Desc>"+
@@ -268,7 +290,6 @@ public void upload(//String Video_name,String Video_tags,String Video_desc,Strin
 	    	dataOutputStream.writeBytes(msg);
 		    dataOutputStream.flush();
 		    long downloaded_size = Long.parseLong(dataInputStream.readLine());
-		    long totalsize = myFile.length();
 		    long loop = (totalsize-downloaded_size)/(long)filesize;
 		    long rem = (totalsize-downloaded_size)%(long)filesize;
 		    FileInputStream fis = new FileInputStream(myFile);
@@ -315,14 +336,44 @@ public void upload(//String Video_name,String Video_tags,String Video_desc,Strin
 	            }
 	        });
 
-	        
+	    	}
+	      }
 	    }
 	   
 	 } catch (final Exception e) {
-		 	
+		 runOnUiThread(new Runnable() {
+	            public void run() {
+	            	Toast.makeText(Upload.this, e.getMessage(), Toast.LENGTH_LONG).show();
+	            }
+	        });
 	 }
 }
+public boolean opportunistic_networking(long filesize,long limit){
 	
+	 ConnectivityManager conMan = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+     //mobile
+    android.net.NetworkInfo.State mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
+
+     //wifi
+     android.net.NetworkInfo.State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
+     
+     if (mobile == NetworkInfo.State.CONNECTED) {
+   	    //mobile
+   	  if(filesize<limit)
+   		  return true;
+   	  else
+   		  return true;
+   	  
+   	} else if (wifi == NetworkInfo.State.CONNECTED) {
+   	    //wifi
+   		return true;
+   	}
+   	else{
+   		return true;
+   	}
+     
+}
 
     Button.OnClickListener buttonSendOnClickListener
 	 = new Button.OnClickListener(){
@@ -335,7 +386,7 @@ public void upload(//String Video_name,String Video_tags,String Video_desc,Strin
 	    Video_tags=tags.getText().toString();
 	    Video_desc=desc.getText().toString();
 	    Video_path=path1;
-		 mDbHelper.createNote(Video_name,Video_desc, Video_tags, "default", "2", "default",
+		 mDbHelper.createNote(Video_name,Video_desc, Video_tags, Video_path, "2", "default",
 				 mHour+":"+mMinute+" "+mDay+"-"+mMonth+"-"+mYear);
 		 textIn.setText("Your Content has been Queued for Upload");
 		 

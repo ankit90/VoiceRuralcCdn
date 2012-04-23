@@ -3,74 +3,182 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:orientation="vertical"
   android:layout_width="match_parent"
-  android:layout_height="match_parent">
-    
+  android:layout_height="match_parent" android:weightSum="1">
+
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:orientation="vertical"
-  android:gravity="center_horizontal" 
-  android:layout_width="match_parent" 
-  android:paddingTop="40px"
+  android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="0.70">
   
-  android:layout_height="220dp">
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:stretchColumns="1"
+    android:weightSum="1">
+        <TableRow 
+        android:paddingTop="20px"
+        android:id="@+id/tableRow1" 
+        android:layout_width="wrap_content" 
+        android:layout_height="match_parent">
+        
+        <TextView android:layout_width="wrap_content"
+			android:layout_height="wrap_content" 
+			android:text="Video Title : " 
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			/>
+			
+	   
+	   <TextView 
+	   android:id="@+id/title"
+	   android:layout_width="wrap_content"
+		android:layout_height="wrap_content" 
+		android:textSize="12dp"
+			/>
+			
+        </TableRow>
+        
+        <TableRow 
+        android:paddingTop="20px"
+        android:id="@+id/tableRow1" 
+        android:layout_width="wrap_content" 
+        android:layout_height="match_parent">
+        
+        <TextView 
+        android:layout_width="wrap_content"
+		android:layout_height="wrap_content" 
+		android:text="Description : " 
+		android:textAppearance="?android:attr/textAppearanceMedium"
+		/>
+	   
+	   <TextView 
+	    android:id="@+id/desc"
+	   	android:layout_width="wrap_content"
+		android:layout_height="wrap_content" 		 
+		android:textSize="12dp"
+		/>
+        </TableRow>
+        
+        <TableRow 
+        android:paddingTop="20px"
+        android:id="@+id/tableRow1" 
+        android:layout_width="wrap_content" 
+        android:layout_height="match_parent">
+        
+        <TextView android:layout_width="wrap_content"
+		android:layout_height="wrap_content" 
+		android:text="Video Tags : " 
+		android:textAppearance="?android:attr/textAppearanceMedium"
+		/>
+	   
+	   <TextView 
+	   android:id="@+id/tags"
+	   android:layout_width="wrap_content"
+	   android:layout_height="wrap_content" 	 
+	   android:textSize="12dp"
+	   />
+        
+      </TableRow> 
+      <TableRow 
+        android:paddingTop="20px"
+        android:id="@+id/tableRow1" 
+        android:layout_width="wrap_content" 
+        android:layout_height="match_parent">
+        
+        <TextView android:layout_width="wrap_content"
+		android:layout_height="wrap_content" 
+		android:text="Conference : " 
+		android:textAppearance="?android:attr/textAppearanceMedium"
+		/>
+	   
+	   <TextView 
+	   android:id="@+id/conf"
+	   android:layout_width="wrap_content"
+	   android:layout_height="wrap_content" 	 
+	   android:textSize="12dp"
+	   />
+        
+      </TableRow>  
+    </TableLayout>
+
   
-    <Button 
-    android:text="Record Voice Comments" 
-    android:id="@+id/record" 
-    android:gravity="center_horizontal" 
-    android:layout_width="wrap_content" 
-    android:layout_height="wrap_content">
-    
-    </Button>
-    <Button 
+ </LinearLayout>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="match_parent" android:layout_height="wrap_content">
+ <Button 
     android:text="Play Video" 
     android:id="@+id/play"
-    android:gravity="center_horizontal" 
-    android:layout_width="wrap_content" 
-    android:layout_height="wrap_content">
+    android:layout_width="wrap_content" android:layout_height="wrap_content">
     
-    </Button>
-   <Button 
-    android:text="View Voice Comments" 
-    android:id="@+id/voice"
-    android:gravity="center_horizontal" 
-    android:layout_width="wrap_content" 
-    android:layout_height="wrap_content">
-    
-    </Button>
-    <Button 
-    android:text="View Comments" 
-    android:id="@+id/comm"
-    android:gravity="center_horizontal" 
-    android:layout_width="wrap_content" 
-    android:layout_height="wrap_content">
-    
-    </Button>
-    
-    
+    </Button>   
 </LinearLayout>
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:orientation="vertical"
   android:layout_width="match_parent"
   android:gravity="center_horizontal" 
-  android:paddingTop="40px"
-  android:layout_height="match_parent">
-  
-  
+  android:paddingTop="40px" android:layout_height="wrap_content" android:layout_weight="0.24">
+   
   <EditText 
   android:layout_width="match_parent" 
   android:id="@+id/text" 
   android:layout_height="wrap_content" 
   android:inputType="textPostalAddress">
     </EditText>
+    <LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="horizontal"
+  android:layout_width="match_parent"
+  android:gravity="center_horizontal" 
+  android:paddingTop="40px" android:weightSum="1" android:layout_height="wrap_content">
     <Button 
     android:text="Comment" 
     android:id="@+id/submit" 
     android:layout_width="wrap_content" 
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content" android:layout_weight="0.24">
     </Button>
-    <Button android:text="Back to Home" android:id="@+id/back" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>   
+    <Button 
+    android:text="View Comments" 
+    android:id="@+id/comm"
+    android:layout_width="wrap_content" android:layout_height="wrap_content">    
+    </Button>
+</LinearLayout>       
+
+
+</LinearLayout>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="horizontal"
+  android:gravity="center_horizontal" 
+  android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="0.20">
+  
+    <Button 
+    android:text="Record Comment" 
+    android:id="@+id/record"  
+    android:layout_width="wrap_content" android:layout_height="wrap_content">
+    
+    </Button>
+    
+   <Button 
+    android:text="Recorded Comments" 
+    android:id="@+id/voice" 
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content">    
+    </Button>    
 </LinearLayout>
 
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="horizontal"
+  android:gravity="right" 
+  android:paddingRight="20px"
+  android:layout_width="fill_parent" android:layout_height="31dp">
+<TextView 
+    android:text="Home" 
+    android:id="@+id/back" 
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content">
+    </TextView>
+</LinearLayout>
 </LinearLayout>

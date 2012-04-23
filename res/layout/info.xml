@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
+  <LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="fill_parent" android:layout_height="fill_parent" android:weightSum="1"> 
+     
    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
     android:stretchColumns="1"
-    android:weightSum="1">
+    android:weightSum="1" android:layout_height="196dp" android:layout_weight="1.01">
         <TableRow 
         android:paddingTop="20px"
         android:id="@+id/tableRow1" android:layout_width="wrap_content" android:layout_height="match_parent">
         <TextView android:layout_width="wrap_content"
 			android:layout_height="wrap_content" 
-			android:text="Video Name" 
+			android:text="Video Name : " 
 			android:textSize="16dp"
 			/>
 	   <TextView 
@@ -27,7 +31,7 @@
         
         android:layout_width="wrap_content"
 			android:layout_height="wrap_content" 
-			android:text="Description" 
+			android:text="Description : " 
 			android:textSize="16dp"
 			/>
 	   <TextView 
@@ -38,12 +42,13 @@
 			/>
         
         </TableRow>
+        
         <TableRow 
         android:paddingTop="20px"
         android:id="@+id/tableRow1" android:layout_width="wrap_content" android:layout_height="match_parent">
         <TextView android:layout_width="wrap_content"
 			android:layout_height="wrap_content" 
-			android:text="Search Tags" 
+			android:text="Search Tags : " 
 			android:textSize="16dp"
 			/>
 	   <TextView 
@@ -54,10 +59,47 @@
 			/>
         
         </TableRow>
+        
         <TableRow 
-        android:paddingTop="40px"
-        android:gravity="center_horizontal"
+        android:paddingTop="20px"
         android:id="@+id/tableRow1" android:layout_width="wrap_content" android:layout_height="match_parent">
+        <TextView android:layout_width="wrap_content"
+			android:layout_height="wrap_content" 
+			android:text="Conference time : " 
+			android:textSize="16dp"
+			/>
+	   <TextView 
+	   android:id="@+id/text4"
+	   android:layout_width="wrap_content"
+			android:layout_height="wrap_content" 	 
+			android:textSize="12dp"
+			/>
+        
+        </TableRow>
+        
+        <TableRow 
+        android:paddingTop="20px"
+        android:id="@+id/tableRow1" android:layout_width="wrap_content" android:layout_height="match_parent">
+        <TextView android:layout_width="wrap_content"
+			android:layout_height="wrap_content" 
+			android:text="Comments : " 
+			android:textSize="16dp"
+			/>
+	   <TextView 
+	   android:id="@+id/text5"
+	   android:layout_width="wrap_content"
+			android:layout_height="wrap_content" 	 
+			android:textSize="12dp"
+			/>
+        
+        </TableRow>
+            
+    </TableLayout>
+ <LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:gravity="center_horizontal"
+  android:layout_width="fill_parent" android:weightSum="1" android:layout_height="wrap_content">    
          <Button 
          android:text="Download Video" 
          android:id="@+id/button1" 
@@ -65,17 +107,19 @@
          android:layout_height="wrap_content"
          >
          </Button>
-              
-        </TableRow>
-        <TableRow
-        android:paddingTop="20px"
-        android:gravity="center_horizontal" 
-        android:id="@+id/tableRow1" >
-            <ProgressBar android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/progressBar1" 
-            style="?android:attr/progressBarStyleHorizontal"></ProgressBar>
-        </TableRow>
-        <TextView 
-        android:id="@+id/tata" android:layout_width="wrap_content" android:layout_height="wrap_content"></TextView>
+ 
+</LinearLayout>
+ <LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:paddingTop="20px"
+  android:layout_width="fill_parent" android:weightSum="1" android:layout_height="wrap_content" android:layout_weight="0.13">                
+
+<TextView 
+        android:id="@+id/tata" 
+        android:layout_height="match_parent" android:layout_width="match_parent" android:layout_weight="2.08">
         
-        
-    </TableLayout>
+        </TextView>        
+    
+</LinearLayout>
+</LinearLayout>

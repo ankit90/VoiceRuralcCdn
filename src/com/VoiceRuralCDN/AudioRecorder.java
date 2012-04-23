@@ -7,7 +7,6 @@ import android.os.Environment;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.content.Context;
 import android.util.Log;
 import android.media.MediaRecorder;

@@ -4,20 +4,32 @@ android:orientation="vertical"
 android:layout_width="fill_parent"
 android:layout_height="fill_parent"
 android:gravity="center_horizontal"
-android:paddingTop="40px">
-    <Button android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+android:weightSum="1">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="horizontal"
+	android:layout_width="fill_parent"
+	android:gravity="center_horizontal"
+	android:paddingTop="400px" android:layout_height="54dp" android:weightSum="1" android:layout_weight="0.79">
+    
+    <Button android:layout_width="200px"
+        android:layout_height="70px"
         android:id="@+id/StartRecord"
-        android:text="Start" />
-	<Button android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:text="Start" android:layout_weight="0.25"/>
+	<Button android:layout_width="200px"
+        android:layout_height="70px"
         android:id="@+id/StopRecord"
-        android:text="Stop" />
-    <Button android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/SendRecord"
-        android:text="Send Comment" />
-    <TextView android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/RecordResult"/>
+        android:text="Stop" android:layout_weight="0.25"/>
+        </LinearLayout> 
+    
+
+    
+    <Button android:id="@+id/SendRecord"
+        android:text="Submit Comment" android:layout_width="149dp"
+        android:layout_height="wrap_content"/>
+  
+   
+    <TextView 
+    	android:id="@+id/RecordResult" android:layout_width="196dp" android:layout_height="17dp" android:layout_weight="0.17"/>
+    	      
+
 </LinearLayout>

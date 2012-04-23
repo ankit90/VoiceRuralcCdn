@@ -1,11 +1,19 @@
 package com.VoiceRuralCDN;
 
 //import java.net.NetworkInterface;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,14 +22,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.*;
 import android.os.Bundle;
+import android.os.Environment;
 import android.speech.RecognizerIntent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class VoiceRecog extends Activity implements OnClickListener{
 	
@@ -29,7 +41,6 @@ public class VoiceRecog extends Activity implements OnClickListener{
     TextView tv,v1,v2,v3;
     Button b;
     private NotesDbAdapter mDbHelper;
-    private Cursor mNotesCursor;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -97,10 +108,318 @@ public class VoiceRecog extends Activity implements OnClickListener{
 	            syncSchema(schema);
 	            
 	        }
-	    }).start(); 
+	    }).start();
+      
+      new Thread(new Runnable() {
+	        public void run() {    
+	        	upload_thread();
+	            
+	        }
+	    }).start();
+      
+      new Thread(new Runnable() {
+	        public void run() {    
+	        	download_thread();
+	            
+	        }
+	    }).start();
       
     }
 
+    private void upload_thread(){
+    	try {
+    		Cursor c = mDbHelper.getUploadQueue();
+    		
+    		if(c.moveToFirst()){
+    			
+    			int count =c.getCount();
+		    	
+    			while(count > 0){
+    				
+		    			Socket socket = null;
+		    		    DataOutputStream dataOutputStream = null;
+		    		    DataInputStream dataInputStream = null;
+						final int rowid= c.getInt(0);
+						final String Video_name = c.getString(1); 
+						String Video_desc = c.getString(2);
+						String Video_tags = c.getString(3);
+						final String Video_path=c.getString(4);
+						final String type =c.getString(5);
+						final String audio=c.getString(6);
+						String time = c.getString(7);
+						
+						Resources resources = this.getResources();
+						AssetManager assetManager = resources.getAssets();
+						// Read from the /assets directory
+						InputStream in = assetManager.open("config.properties");
+						Properties properties = new Properties();
+						properties.load(in);
+						final int filesize = Integer.parseInt(properties.getProperty("SizeLimit"));
+						socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
+		    		
+						
+						if(socket==null){
+			    			runOnUiThread(new Runnable() {
+			    	            public void run() {
+			    	            	Toast.makeText(VoiceRecog.this,"No Network Connection", Toast.LENGTH_LONG).show();
+			    	            }
+			    	        });
+						}
+						else{
+								Date d = new Date();   
+		    	  	
+								String mFileName =Video_path ;
+								File myFile = new File (mFileName);
+								long totalsize = myFile.length();
+			    		 	
+								boolean flag= opportunistic_networking(totalsize,(long)filesize);
+			    		 	
+								if(flag==true)
+								{
+				    		 	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
+				    			  "<Message><size>0</size><fileName>"+Video_name+"</fileName>" +
+				    			  "<Title>"+myFile.length()+"</Title><Desc>"+Video_desc+"</Desc>"+
+				     			  "<Tags>"+Video_tags+"</Tags><Time_stamp>"+d.toString()+"</Time_stamp>"+
+				                "<Conference_stamp>"+time+"</Conference_stamp>"
+				                +"<Function>upload</Function>" +"</Message></root>\n";
+				    		 	dataOutputStream = new DataOutputStream(socket.getOutputStream());
+				    	        dataInputStream = new DataInputStream(socket.getInputStream());
+				    	    	dataOutputStream.writeBytes(msg);
+				    		    dataOutputStream.flush();
+				    		    long downloaded_size = Long.parseLong(dataInputStream.readLine());
+				    		    long loop = (totalsize-downloaded_size)/(long)filesize;
+				    		    long rem = (totalsize-downloaded_size)%(long)filesize;
+				    		    FileInputStream fis = new FileInputStream(myFile);
+				    		    BufferedInputStream bis = new BufferedInputStream(fis);
+				    		    long l = downloaded_size/(long)filesize;
+				    		    long r = downloaded_size%(long)filesize;
+				    		    long t1=0;
+				    		    while(t1<l){
+				    		    	byte [] my  = new byte [filesize];
+				    			    bis.read(my,0,my.length);
+				    			    t1++;
+				    		    }
+				    		    if(r != 0){
+				    		    	byte [] my  = new byte [(int)(downloaded_size-t1*filesize)];
+				    			    bis.read(my,0,my.length);
+				    		    }
+				    		    long t=0;
+				    		    while(t<loop){
+				    		    	byte [] mybytearray  = new byte [filesize];
+				    		    	bis.read(mybytearray,0,mybytearray.length);
+				    		        dataOutputStream.write(mybytearray,0,mybytearray.length);
+				    		        dataOutputStream.flush();
+				    		        t++;
+				    		    }
+				    		    if(rem != 0){
+				    		    	byte [] mybytearray  = new byte [(int)(totalsize-downloaded_size-loop*filesize)];
+				    		    	bis.read(mybytearray,0,mybytearray.length);
+				    		        dataOutputStream.write(mybytearray,0,mybytearray.length);
+				    		        dataOutputStream.flush();
+				    		    }
+				
+				    		    String confirmation=(dataInputStream.readLine());
+				    			mDbHelper.updateNote(rowid, Video_name,Video_desc, Video_tags, "default", "0", "default",
+				    					 time);
+				    	        
+				    	        
+				    	        runOnUiThread(new Runnable() {
+				    	            public void run() {
+				    	            	Toast.makeText(VoiceRecog.this, Video_name+" - has been Uploaded" , Toast.LENGTH_LONG).show();
+				    	            }
+				    	        });
+				
+				    	    }
+								dataInputStream.close();
+				    			dataOutputStream.close();
+				    	        socket.close();
+		    	      }
+		    		
+					c.moveToNext();
+		    		count--;
+		    		Thread.sleep(100000);
+		    		
+		    		}
+    		}
+    	 } catch (final Exception e) {
+    		 runOnUiThread(new Runnable() {
+    	            public void run() {
+    	            	Toast.makeText(VoiceRecog.this, e.getMessage(), Toast.LENGTH_LONG).show();
+    	            }
+    	        });
+    	 }
+    }
+    public boolean opportunistic_networking(long filesize,long limit){
+		
+		 ConnectivityManager conMan = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+	      //mobile
+	     android.net.NetworkInfo.State mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
+
+	      //wifi
+	      android.net.NetworkInfo.State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
+	      
+	      if (mobile == NetworkInfo.State.CONNECTED) {
+	    	    //mobile
+	    	  if(filesize<limit)
+	    		  return true;
+	    	  else
+	    		  return true;
+	    	  
+	    	} else if (wifi == NetworkInfo.State.CONNECTED) {
+	    	    //wifi
+	    		return true;
+	    	}
+	    	else{
+	    		return true;
+	    	}
+	      
+	}
+    private void download_thread(){
+    	try {
+			
+    		Cursor c = mDbHelper.getDownloadQueue();
+    		
+    		if(c.moveToFirst()){
+    			
+    			int count = c.getCount();
+    			
+    			while(count > 0){
+    			Socket socket = null;
+    		    DataOutputStream dataOutputStream = null;
+    		    DataInputStream dataInputStream = null;
+				final int rowid= c.getInt(0);
+				String title = c.getString(1); 
+				String desc = c.getString(2);
+				String tags = c.getString(3);
+				final String comments=c.getString(4);
+				final String type =c.getString(5);
+				final String audio=c.getString(6);
+					if(type.equalsIgnoreCase("0") || type.equalsIgnoreCase("3"))
+					{
+					
+						String file=Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+title;
+						File f = new File(file);
+						long d=0;
+						if (f.exists())
+							d=f.length();
+						desc = d+"";
+						Resources resources = this.getResources();
+						AssetManager assetManager = resources.getAssets();
+						// Read from the /assets directory
+						InputStream in = assetManager.open("config.properties");
+						Properties properties = new Properties();
+						properties.load(in);
+						final int filesize = Integer.parseInt(properties.getProperty("SizeLimit"));
+						socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
+						if(socket==null)
+						{
+							runOnUiThread(new Runnable() {
+					            public void run() {
+					            	Toast.makeText(VoiceRecog.this, "No Network Connection", Toast.LENGTH_LONG).show();
+					            }
+					        });
+						}
+						else{
+						dataOutputStream = new DataOutputStream(socket.getOutputStream());
+					  	dataInputStream = new DataInputStream(socket.getInputStream());
+					  	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
+					  				  "<Message><size>1</size><fileName>"+"f"+"</fileName>" +
+					  				  "<Title>"+title+"</Title><Desc>"+desc+"</Desc>"+
+				           			  "<Tags>"+tags+"</Tags><Time_stamp>"+"t"+"</Time_stamp>"+
+				                      "<Conference_stamp>"+"c"+"</Conference_stamp>"
+				                      +"<Function>download</Function>" + "</Message></root>\n";
+					    dataOutputStream.writeBytes(msg);
+					    dataOutputStream.flush();
+					    String rec = dataInputStream.readLine();
+					    long size = Long.parseLong(rec);
+					    boolean flag= opportunistic_networking(size,(long)filesize);
+					    if(flag==true){
+					    	
+					    FileOutputStream fos;
+		                if (f.exists())
+		                    fos = new FileOutputStream(file,true);
+		                else
+		                    fos = new FileOutputStream(file);
+		                BufferedOutputStream bos = new BufferedOutputStream(fos);
+		                long t=0;
+		                int bytesRead;
+		    		    int current = 0;
+		    		    byte [] mybytearray;
+		                long loop = (size-d)/filesize;
+		                long rem = (size-d)%filesize;
+		                while(t<loop){
+		                    mybytearray  = new byte [filesize];
+		                    bytesRead = dataInputStream.read(mybytearray,0,filesize);
+						    current = bytesRead;
+						    do {
+						      if(current>=filesize)
+						        break;
+						       bytesRead =
+						    	   dataInputStream.read(mybytearray, current, (mybytearray.length-current));
+						       if(bytesRead >= 0) current += bytesRead;
+						    } while(bytesRead > -1);
+						    bos.write(mybytearray, 0 , current);
+						    bos.flush();
+						    t++;
+						    }
+		                if(rem!=0){
+		                    mybytearray  = new byte [filesize];
+		                    bytesRead = dataInputStream.read(mybytearray,0,filesize);
+						    current = bytesRead;
+						    do {
+						      if(current>=size-t*filesize-d)
+						        break;
+						       bytesRead =
+						    	   dataInputStream.read(mybytearray, current, (mybytearray.length-current));
+						       if(bytesRead >= 0) current += bytesRead;
+						    } while(bytesRead > -1);
+		                    bos.write(mybytearray, 0 , current);
+						    bos.flush();
+		                }
+		                dataOutputStream.writeBytes("File " + title +" received succesfully.\n");
+		                dataOutputStream.flush();
+		                bos.close();
+						mDbHelper.updateNote(rowid, title, desc, tags, comments, "1",audio,c.getString(7));
+						dataInputStream.close();
+						dataOutputStream.close();
+						socket.close();
+						runOnUiThread(new Runnable() {
+				            public void run() {
+				            	Toast.makeText(VoiceRecog.this, "Video downloaded successfully", Toast.LENGTH_LONG).show();
+				            }
+				        });
+					   }
+					    else{
+					    	dataInputStream.close();
+							dataOutputStream.close();
+							socket.close();
+					    }
+					  }
+					}
+					else{
+						runOnUiThread(new Runnable() {
+				            public void run() {
+				            	Toast.makeText(VoiceRecog.this, "Video already Downloaded", Toast.LENGTH_LONG).show();
+				            }
+				        });
+					}
+					count--;
+					c.moveToNext();
+					Thread.sleep(10000);
+					
+    				}
+    				}
+					} catch (final Exception e) {
+						  // TODO Auto-generated catch block
+						 //tv.setText(e.getMessage()+" Some connection Problem");
+						runOnUiThread(new Runnable() {
+				            public void run() {
+				            	Toast.makeText(VoiceRecog.this, e.getMessage(), Toast.LENGTH_LONG).show();
+				            }
+				        });
+					 }
+    }
 	private void startVoiceRecognitionActivity() {
 	    Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 	    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -126,7 +445,8 @@ public class VoiceRecog extends Activity implements OnClickListener{
     		if(cur!=null && cur.getCount()==0){
     				mDbHelper.createNote(arr1[0], arr1[1], arr1[2], arr1[3],"0",arr1[5],arr1[4]);
     		}
-    		else if(cur!=null && cur.getCount()==1){
+    		else if(cur!=null && cur.getCount()==1 && cur.getString(4).equalsIgnoreCase("1")||
+    				cur.getString(4).equalsIgnoreCase("1")){
     			mDbHelper.updateNote(cur.getInt(0),arr1[0], arr1[1], arr1[2], arr1[3],cur.getString(5),arr1[5],arr1[4]);
     		}
     	}
@@ -137,7 +457,14 @@ public class VoiceRecog extends Activity implements OnClickListener{
         DataOutputStream dataOutputStream = null;
         DataInputStream dataInputStream = null;
     	try {
-        socket = new Socket("192.168.1.185", 2004);
+    		Resources resources = this.getResources();
+			AssetManager assetManager = resources.getAssets();
+			// Read from the /assets directory
+			InputStream in = assetManager.open("config.properties");
+			Properties properties = new Properties();
+			properties.load(in);
+			final int filesize = Integer.parseInt(properties.getProperty("SizeLimit"));
+			socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
 
 	  		dataOutputStream = new DataOutputStream(socket.getOutputStream());
 		  	dataInputStream = new DataInputStream(socket.getInputStream());

@@ -2,10 +2,13 @@ package com.VoiceRuralCDN;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Properties;
 
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Environment;
@@ -50,7 +53,14 @@ public class ViewVoice extends ListActivity{
     	if (!f.exists())
     	{
 	    	try{
-		        socket = new Socket("192.168.1.185", 2004);
+	    		Resources resources = this.getResources();
+				AssetManager assetManager = resources.getAssets();
+				// Read from the /assets directory
+				InputStream in = assetManager.open("config.properties");
+				Properties properties = new Properties();
+				properties.load(in);
+				final int filesize = Integer.parseInt(properties.getProperty("SizeLimit"));
+				socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
 				dataOutputStream = new DataOutputStream(socket.getOutputStream());
 			  	dataInputStream = new DataInputStream(socket.getInputStream());
 			  	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
@@ -62,7 +72,6 @@ public class ViewVoice extends ListActivity{
 			  	dataOutputStream.writeBytes(msg);
 			  	dataOutputStream.flush();
 			  	int size = Integer.parseInt(dataInputStream.readLine());
-			  	int filesize = 5242880;
 			  	int bytesRead;
 			    int current = 0;
 			    byte [] mybytearray  = new byte [filesize];

@@ -2,10 +2,16 @@ package com.VoiceRuralCDN;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Properties;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.widget.Button;
@@ -22,6 +28,8 @@ public class DisplayInfo extends Activity{
     String title,desc,tags; Button download;
     private NotesDbAdapter mDbHelper;
     String message ="";
+    int servport=0;
+    String server="";
     private Cursor mNotesCursor;
 	    /** Called when the activity is first created. */
 	    @Override
@@ -35,6 +43,18 @@ public class DisplayInfo extends Activity{
 	        ((TextView)findViewById(R.id.text1)).setText(title);
 	        ((TextView)findViewById(R.id.text2)).setText(desc);
 	        ((TextView)findViewById(R.id.text3)).setText(tags);
+	        ((TextView)findViewById(R.id.text4)).setText(s.getString("CONF"));
+	        String comments=s.getString("COMM");
+	        String [] arr = comments.split("~");
+	        String comm="";
+	        for(int i=0;i<arr.length;i++){
+	        	if(i==0)
+	        		comm=arr[i];
+	        	else
+	        		comm=comm+"\n"+arr[i];
+	        }
+	        	
+	        ((TextView)findViewById(R.id.text5)).setText(comm);
 	        tv =(TextView)findViewById(R.id.tata);
 	        download = (Button)findViewById(R.id.button1);
 	        
@@ -60,23 +80,43 @@ public class DisplayInfo extends Activity{
 		        	download(type,rowid,comments,audio);
 		        }
 		    }).start();
-		 
+			
+			tv.setText("Your video has been queued for download !!");		 
 		}};
 		
 		
 		public void download(String type,int rowid,String comments,String audio){
 		
+			
 			try {
+				
+				
 			if(type.equalsIgnoreCase("0") || type.equalsIgnoreCase("3"))
 			{
-			
+				
 				String file=Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+title;
 				File f = new File(file);
 				long d=0;
 				if (f.exists())
 					d=f.length();
 				desc = d+"";
-				socket = new Socket("192.168.1.185", 2004);
+				Resources resources = this.getResources();
+				AssetManager assetManager = resources.getAssets();
+				// Read from the /assets directory
+				InputStream in = assetManager.open("config.properties");
+				Properties properties = new Properties();
+				properties.load(in);
+				final int filesize = Integer.parseInt(properties.getProperty("SizeLimit"));
+				socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
+				if(socket==null)
+				{
+					runOnUiThread(new Runnable() {
+			            public void run() {
+			            	Toast.makeText(DisplayInfo.this, "No Network Connection", Toast.LENGTH_LONG).show();
+			            }
+			        });
+				}
+				else{
 				dataOutputStream = new DataOutputStream(socket.getOutputStream());
 			  	dataInputStream = new DataInputStream(socket.getInputStream());
 			  	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
@@ -89,7 +129,10 @@ public class DisplayInfo extends Activity{
 			    dataOutputStream.flush();
 			    String rec = dataInputStream.readLine();
 			    long size = Long.parseLong(rec);
-			    int filesize = 5242880;
+			    boolean flag=opportunistic_networking(size,(long)filesize);
+			    dataOutputStream.writeBoolean(flag);
+			    if(flag==true){
+			    	
 			    FileOutputStream fos;
                 if (f.exists())
                     fos = new FileOutputStream(file,true);
@@ -143,8 +186,13 @@ public class DisplayInfo extends Activity{
 		            	Toast.makeText(DisplayInfo.this, "Video downloaded successfully", Toast.LENGTH_LONG).show();
 		            }
 		        });
-				
-			
+			   }
+			    else{
+			    	dataInputStream.close();
+					dataOutputStream.close();
+					socket.close();
+			    }
+			  }
 			}
 			else{
 				runOnUiThread(new Runnable() {
@@ -154,13 +202,42 @@ public class DisplayInfo extends Activity{
 		        });
 			}
 			
-			
-			
 			} catch (Exception e) {
 				  // TODO Auto-generated catch block
 				 //tv.setText(e.getMessage()+" Some connection Problem");
+				runOnUiThread(new Runnable() {
+		            public void run() {
+		            	Toast.makeText(DisplayInfo.this, "Some Exception", Toast.LENGTH_LONG).show();
+		            }
+		        });
 			 }
 			
+		}
+		public boolean opportunistic_networking(long filesize,long limit){
+			
+			 ConnectivityManager conMan = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+		      //mobile
+		     android.net.NetworkInfo.State mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
+
+		      //wifi
+		      android.net.NetworkInfo.State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
+		      
+		      if (mobile == NetworkInfo.State.CONNECTED) {
+		    	    //mobile
+		    	  if(filesize<limit)
+		    		  return true;
+		    	  else
+		    		  return true;
+		    	  
+		    	} else if (wifi == NetworkInfo.State.CONNECTED) {
+		    	    //wifi
+		    		return true;
+		    	}
+		    	else{
+		    		return true;
+		    	}
+		      
 		}
 		public void displayfinal(View v,String message)
 		{
