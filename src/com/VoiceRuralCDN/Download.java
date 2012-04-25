@@ -45,7 +45,7 @@ public class Download extends ListActivity {
 		}
 		else{
 	        fillData();
-	        registerForContextMenu(getListView());
+	        //registerForContextMenu(getListView());
 		}
     }
     
@@ -60,47 +60,47 @@ public class Download extends ListActivity {
         setListAdapter(notes);
     }
     
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        menu.add(0, INSERT_ID,0, R.string.menu_insert);
-        return true;
-    }
-
-    @Override
-    public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        switch(item.getItemId()) {
-        case INSERT_ID:
-            createNote();
-            return true;
-        }
-        return super.onMenuItemSelected(featureId, item);
-    }
-
-    @Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
-    	    super.onCreateContextMenu(menu, v, menuInfo);
-    	    menu.add(0, DELETE_ID, 0, R.string.menu_delete);
-	}
-
-    @Override
-	public boolean onContextItemSelected(MenuItem item) {
-    	switch(item.getItemId()) {
-        case DELETE_ID:
-            AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-            mDbHelper.deleteNote(info.id);
-            fillData();
-            return true;
-        }
-        return super.onContextItemSelected(item);
-	}
-
-    private void createNote() {
-    	/*Intent i = new Intent(this, NoteEdit.class);
-    	startActivityForResult(i, ACTIVITY_CREATE);*/
-    }
-    
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        super.onCreateOptionsMenu(menu);
+//        menu.add(0, INSERT_ID,0, R.string.menu_insert);
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+//        switch(item.getItemId()) {
+//        case INSERT_ID:
+//            createNote();
+//            return true;
+//        }
+//        return super.onMenuItemSelected(featureId, item);
+//    }
+//
+//    @Override
+//	public void onCreateContextMenu(ContextMenu menu, View v,
+//			ContextMenuInfo menuInfo) {
+//    	    super.onCreateContextMenu(menu, v, menuInfo);
+//    	    menu.add(0, DELETE_ID, 0, R.string.menu_delete);
+//	}
+//
+//    @Override
+//	public boolean onContextItemSelected(MenuItem item) {
+//    	switch(item.getItemId()) {
+//        case DELETE_ID:
+//            AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+//            mDbHelper.deleteNote(info.id);
+//            fillData();
+//            return true;
+//        }
+//        return super.onContextItemSelected(item);
+//	}
+//
+//    private void createNote() {
+//    	/*Intent i = new Intent(this, NoteEdit.class);
+//    	startActivityForResult(i, ACTIVITY_CREATE);*/
+//    }
+//    
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
   
@@ -154,19 +154,5 @@ public class Download extends ListActivity {
     	    break;
     	}
     }*/
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mDbHelper.close();
-    }
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mDbHelper.close();
-    }
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mDbHelper.close();
-    }
+   
 }

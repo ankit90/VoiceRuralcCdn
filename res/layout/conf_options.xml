@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="horizontal"
+  android:gravity="center_horizontal"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:paddingTop="500px">
+    
+    <Button android:text="Start Conference" 
+    android:id="@+id/button1" 
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content">
+    </Button>
+    
+    <Button android:text="Join Conference" 
+    android:id="@+id/button2" 
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content">
+    </Button>
+    
+</LinearLayout>

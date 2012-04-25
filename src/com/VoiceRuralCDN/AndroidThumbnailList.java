@@ -11,21 +11,27 @@ import android.graphics.Bitmap;
 import android.media.ThumbnailUtils;
 import android.os.Bundle;
 import android.provider.MediaStore.Video.Thumbnails;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class AndroidThumbnailList extends ListActivity{
 	
 	private NotesDbAdapter mDbHelper;
+	private static final int DELETE_ID = Menu.FIRST + 1;
     private Cursor mNotesCursor;
     Vector <String> v = new Vector<String>();
 	String[] videoFileList;
-	public class MyThumbnaildapter extends ArrayAdapter<String>{
+	public class MyThumbnaildapter extends ArrayAdapter<String> implements View.OnCreateContextMenuListener{
 
 		 public MyThumbnaildapter(Context context, int textViewResourceId,
 		   String[] objects) {
@@ -59,19 +65,31 @@ public class AndroidThumbnailList extends ListActivity{
 		                    startActivity(intent);
 		                    }
 		            });
-		 
+		      row.setOnCreateContextMenuListener(this);
+
 		  return row;
 		 }
+		 public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+	          // empty implementation
+	        }
+
 
 		}
-
+	 	
 		  /** Called when the activity is first created. */
 		  @Override
 		  public void onCreate(Bundle savedInstanceState) {
 		      super.onCreate(savedInstanceState);
 		      mDbHelper = new NotesDbAdapter(this);
 		      mDbHelper.open();
-		      mNotesCursor = mDbHelper.searchType("1");
+		      
+		      fillVideos();
+		      
+		      registerForContextMenu(getListView());
+		  }
+		  
+		  public void fillVideos(){
+			  mNotesCursor = mDbHelper.searchType("1");
 		      int rows = mNotesCursor.getCount();
 		      while(rows>0)
 		      {
@@ -85,4 +103,23 @@ public class AndroidThumbnailList extends ListActivity{
 		      }
 		      setListAdapter(new MyThumbnaildapter(AndroidThumbnailList.this, R.layout.row, videoFileList));
 		  }
+		  @Override
+			public void onCreateContextMenu(ContextMenu menu, View v,
+					ContextMenuInfo menuInfo) {
+		    	    super.onCreateContextMenu(menu, v, menuInfo);
+		    	    menu.add(0, DELETE_ID, 0, R.string.menu_delete);
+			}
+		
+		    @Override
+			public boolean onContextItemSelected(MenuItem item) {
+		    	switch(item.getItemId()) {
+		        case DELETE_ID:
+		            AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		            mNotesCursor.moveToPosition((int) info.id);
+		            mDbHelper.deleteNote(mNotesCursor.getLong(0));
+		            fillVideos();
+		            return true;
+		        }
+		        return super.onContextItemSelected(item);
+			}
 		}

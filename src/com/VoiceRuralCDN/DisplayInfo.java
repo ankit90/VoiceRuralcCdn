@@ -2,6 +2,7 @@ package com.VoiceRuralCDN;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Date;
 import java.util.Properties;
 
 import android.app.Activity;
@@ -35,6 +36,8 @@ public class DisplayInfo extends Activity{
 	    @Override
 	    public void onCreate(Bundle savedInstanceState) {
 	        super.onCreate(savedInstanceState);
+	        mDbHelper = new NotesDbAdapter(this);
+	        mDbHelper.open();
 	        setContentView(R.layout.info);
 	        Bundle s = getIntent().getExtras();
 	        title = s.getString("TITLE");
@@ -59,8 +62,7 @@ public class DisplayInfo extends Activity{
 	        download = (Button)findViewById(R.id.button1);
 	        
 	        download.setOnClickListener(buttonSendOnClickListener);
-	        mDbHelper = new NotesDbAdapter(this);
-	        mDbHelper.open();
+	        
 	    }
 	    
 		Button.OnClickListener buttonSendOnClickListener
@@ -75,30 +77,54 @@ public class DisplayInfo extends Activity{
 			final String comments=mNotesCursor.getString(4);
 			final String audio=mNotesCursor.getString(6);
 			mDbHelper.updateNote(rowid, title, desc, tags, comments, "3",audio,mNotesCursor.getString(7));
+			tv.setText("Your video has been queued for download !!");
+			
+			if(getNetwork()==true){
 			new Thread(new Runnable() {
 		        public void run() {    
 		        	download(type,rowid,comments,audio);
 		        }
 		    }).start();
+			}
 			
-			tv.setText("Your video has been queued for download !!");
+			String time=mNotesCursor.getString(7);
+        	String [] arr=time.split(" ");
+        	String [] arr1=arr[0].split(":");
+        	String [] arr2=arr[1].split("-");
+        	
+//        	Date d = new Date(Integer.parseInt(arr2[2]),
+//        						Integer.parseInt(arr2[1]),
+//        						Integer.parseInt(arr2[0]),
+//        						Integer.parseInt(arr1[0]),
+//        						Integer.parseInt(arr1[1]));
 //			Intent intent = new Intent(Intent.ACTION_EDIT);
 //	        intent.setType("vnd.android.cursor.item/event");
-//	        //intent.putExtra("beginTime", d1.getSeconds()*1000);
+//	        intent.putExtra("beginTime", d.getSeconds()*1000);
 //	        intent.putExtra("allDay", true);
 //	        intent.putExtra("rrule", "FREQ=YEARLY");
-//	        //intent.putExtra("endTime", (d1.getSeconds()*1000)+(60*60*1000));
+//	        intent.putExtra("endTime", (d.getSeconds()*1000)+(60*60*1000));
 //	        intent.putExtra("title", "Conference for Video : "+title);
 //	        startActivity(intent);
 		}};
 		
-		
+		public boolean getNetwork(){
+
+			 ConnectivityManager conMan = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+		     android.net.NetworkInfo.State mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
+
+		      android.net.NetworkInfo.State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
+		      
+		      if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
+		    	  return true;
+		      }
+		      else
+		    	  return false;
+			
+		}
 		public void download(String type,int rowid,String comments,String audio){
 		
-			
-			try {
-				
-				
+			try {		
 			if(type.equalsIgnoreCase("0") || type.equalsIgnoreCase("3"))
 			{
 				
@@ -237,7 +263,7 @@ public class DisplayInfo extends Activity{
 		      if (mobile == NetworkInfo.State.CONNECTED) {
 		    	    //mobile
 		    	  if(filesize<limit)
-		    		  return false;
+		    		  return true;
 		    	  else
 		    		  return false;
 		    	  
@@ -246,7 +272,7 @@ public class DisplayInfo extends Activity{
 		    		return true;
 		    	}
 		    	else{
-		    		return true;
+		    		return false;
 		    	}
 		      
 		}
@@ -257,22 +283,5 @@ public class DisplayInfo extends Activity{
 	    	startActivity(foo);
 		}
 		
-		 @Override
-		    protected void onDestroy() {
-		        super.onDestroy();
-		        mDbHelper.close();
-
-		    }
-		    @Override
-		    protected void onPause() {
-		        super.onPause();
-		        mDbHelper.close();
-
-		    }
-		    @Override
-		    protected void onStop() {
-		        super.onStop();
-		        mDbHelper.close();
-
-		    }
+		
 }

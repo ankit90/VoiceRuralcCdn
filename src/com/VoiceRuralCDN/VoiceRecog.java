@@ -3,17 +3,28 @@ package com.VoiceRuralCDN;
 //import java.net.NetworkInterface;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -102,11 +113,13 @@ public class VoiceRecog extends Activity implements OnClickListener{
         alert.show();
     	}
       
+      
+    if(getNetwork()){  
       new Thread(new Runnable() {
 	        public void run() {    
-	        	String schema=getDBschema();
-	            syncSchema(schema);
-	            
+//	        	String schema=getDBschema();
+//	            syncSchema(schema);
+	  				db();      	          
 	        }
 	    }).start();
       
@@ -123,9 +136,25 @@ public class VoiceRecog extends Activity implements OnClickListener{
 	            
 	        }
 	    }).start();
+    }
+    
       
     }
+    public boolean getNetwork(){
 
+		 ConnectivityManager conMan = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+	     android.net.NetworkInfo.State mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
+
+	      android.net.NetworkInfo.State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
+	      
+	      if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
+	    	  return true;
+	      }
+	      else
+	    	  return false;
+		
+	}
     private void upload_thread(){
     	try {
     		Cursor c = mDbHelper.getUploadQueue();
@@ -265,7 +294,7 @@ public class VoiceRecog extends Activity implements OnClickListener{
 	      if (mobile == NetworkInfo.State.CONNECTED) {
 	    	    //mobile
 	    	  if(filesize<limit)
-	    		  return false;
+	    		  return true;
 	    	  else
 	    		  return false;
 	    	  
@@ -274,7 +303,7 @@ public class VoiceRecog extends Activity implements OnClickListener{
 	    		return true;
 	    	}
 	    	else{
-	    		return true;
+	    		return false;
 	    	}
 	      
 	}
@@ -429,16 +458,6 @@ public class VoiceRecog extends Activity implements OnClickListener{
     	for(int i=0;i<arr.length;i++){
     		String [] arr1 = arr[i].split("#");
     		Cursor cur =mDbHelper.searchName(arr1[0]);
-//    		String [] temp = arr1[4].split("~");
-//    		if(!temp[0].equals("default"))
-//    			for(int j=0;j<temp.length;j++)
-//    				temp[j] = temp[j]+" 0";
-//    		if(!temp[0].equals("default"))
-//    			arr1[4] = temp[0];
-//    		else
-//    			arr1[4] = "";
-//    		for(int j=1;j<temp.length;j++)
-//    			arr1[4] = arr1[4]+"~"+temp[j];
     		if(!cur.moveToFirst()){
     				mDbHelper.createNote(arr1[0], arr1[1], arr1[2], arr1[3],"0",arr1[5],arr1[4]);
     		}
@@ -477,9 +496,89 @@ public class VoiceRecog extends Activity implements OnClickListener{
 			dataInputStream.close();
 			dataOutputStream.close();
 			socket.close();
+			
+
+			  // now get the data from each entry
+			
+			
+			
     	}catch(Exception e){}
 	    
     	return response;
+    }
+    
+    
+    public void db(){
+    	
+    	try {
+    	InputStream is = null;
+		JSONObject jObj = null;
+		String json = "";
+		//Toast.makeText(VoiceRecog.this, "In db", Toast.LENGTH_LONG).show();
+		
+	
+			// defaultHttpClient
+    		
+    		Resources resources = this.getResources();
+			AssetManager assetManager = resources.getAssets();
+			// Read from the /assets directory
+			InputStream in = assetManager.open("config.properties");
+			Properties properties = new Properties();
+			properties.load(in);
+			String server=properties.getProperty("ServerIp");
+			DefaultHttpClient httpClient = new DefaultHttpClient();
+			HttpPost httpPost = new HttpPost("http://"+server+"/script.php");
+
+			HttpResponse httpResponse = httpClient.execute(httpPost);
+			HttpEntity httpEntity = httpResponse.getEntity();
+			is = httpEntity.getContent();			
+
+				BufferedReader reader = new BufferedReader(new InputStreamReader(
+					is, "iso-8859-1"), 8);
+			StringBuilder sb = new StringBuilder();
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				sb.append(line + "\n");
+			}
+			is.close();
+			json = sb.toString();
+
+			JSONArray newarray = new JSONArray(json);
+			for(int i = 0; i < newarray.length(); i++){
+				
+				JSONObject c = newarray.getJSONObject(i);
+				String title = c.getString("title");
+				String desc = c.getString("desc");
+				String tags = c.getString("tags");
+				String comments = c.getString("comments");
+				String conf = c.getString("conference_time");
+				String audio = c.getString("audio_comments");
+				
+				Cursor cur =mDbHelper.searchName(title);
+	    		if(!cur.moveToFirst()){
+	    				mDbHelper.createNote(title,desc,tags, comments,"0",audio,conf);
+	    		}
+	    		else if(cur!=null && (cur.getString(5).equalsIgnoreCase("1")||
+	    				cur.getString(5).equalsIgnoreCase("0"))){
+	    			mDbHelper.updateNote(cur.getLong(0),title,desc,tags,comments,cur.getString(5),audio,conf);
+	    		}
+				
+			}
+
+			
+		} catch (final Exception e) {
+			
+			runOnUiThread(new Runnable() {
+	            public void run() {
+	            	Toast.makeText(VoiceRecog.this, e.getMessage(), Toast.LENGTH_LONG).show();
+	            }
+	        });
+			
+		}
+
+		
+		
+
     }
 	@Override
 	public void onClick(View v) {

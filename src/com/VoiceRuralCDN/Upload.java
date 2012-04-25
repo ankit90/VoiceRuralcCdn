@@ -374,7 +374,7 @@ public boolean opportunistic_networking(long filesize,long limit){
      if (mobile == NetworkInfo.State.CONNECTED) {
    	    //mobile
    	  if(filesize<limit)
-   		  return false;
+   		  return true;
    	  else
    		  return false;
    	  
@@ -383,11 +383,25 @@ public boolean opportunistic_networking(long filesize,long limit){
    		return true;
    	}
    	else{
-   		return true;
+   		return false;
    	}
      
 }
+public boolean getNetwork(){
 
+	 ConnectivityManager conMan = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+    android.net.NetworkInfo.State mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
+
+     android.net.NetworkInfo.State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
+     
+     if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
+   	  return true;
+     }
+     else
+   	  return false;
+	
+}
     Button.OnClickListener buttonSendOnClickListener
 	 = new Button.OnClickListener(){
 
@@ -402,23 +416,25 @@ public boolean opportunistic_networking(long filesize,long limit){
 		 mDbHelper.createNote(Video_name,Video_desc, Video_tags, Video_path, "2", "default",
 				 mHour+":"+mMinute+" "+mDay+"-"+mMonth+"-"+mYear);
 		 textIn.setText("Your Content has been Queued for Upload");
+		 
+		 if(getNetwork()){
 		 new Thread(new Runnable() {
 		        public void run() {    
 		        	upload(//Video_name,Video_tags,Video_desc,Video_path,
 		        						mHour+":"+mMinute+" "+mDay+"-"+mMonth+"-"+mYear);
 		        }
 		    }).start();
-		 
+		 }
 		 	//Calendar cal = Calendar.getInstance();
-		 	//Date d1 = new Date(mYear,mMonth,mDay,mHour,mMinute);
-	        Intent intent = new Intent(Intent.ACTION_EDIT);
-	        intent.setType("vnd.android.cursor.item/event");
-	        //intent.putExtra("beginTime", d1.getSeconds()*1000);
-	        intent.putExtra("allDay", true);
-	        intent.putExtra("rrule", "FREQ=YEARLY");
-	        //intent.putExtra("endTime", (d1.getSeconds()*1000)+(60*60*1000));
-	        intent.putExtra("title", "Conference for Video : "+Video_name);
-	        startActivity(intent);
+//		 	Date d1 = new Date(mYear,mMonth,mDay,mHour,mMinute);
+//	        Intent intent = new Intent(Intent.ACTION_EDIT);
+//	        intent.setType("vnd.android.cursor.item/event");
+//	        intent.putExtra("beginTime",d1.getSeconds()*1000);
+//	        intent.putExtra("allDay", true);
+//	        intent.putExtra("rrule", "FREQ=YEARLY");
+//	        intent.putExtra("endTime", (d1.getSeconds()*1000)+(60*60*1000));
+//	        intent.putExtra("title", "Conference for Video : "+Video_name);
+//	        startActivity(intent);
 		 
 	}};
 	
