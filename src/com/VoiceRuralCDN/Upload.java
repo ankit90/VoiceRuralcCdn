@@ -410,8 +410,18 @@ public boolean getNetwork(){
 	 // TODO Auto-generated method stub
 		//upload();
 		Video_name=name.getText().toString();
+		if(Video_name.equals("")){
+			textIn.setText("Please Specify a File name!!");
+		}
+		else{
 	    Video_tags=tags.getText().toString();
+	    if(Video_tags.equals("")){
+			Video_tags="Default";
+		}
 	    Video_desc=desc.getText().toString();
+	    if(Video_desc.equals("")){
+			Video_desc="Default";
+		}
 	    Video_path=path1;
 		 mDbHelper.createNote(Video_name,Video_desc, Video_tags, Video_path, "2", "default",
 				 mHour+":"+mMinute+" "+mDay+"-"+mMonth+"-"+mYear);
@@ -425,6 +435,7 @@ public boolean getNetwork(){
 		        }
 		    }).start();
 		 }
+		}
 		 	//Calendar cal = Calendar.getInstance();
 //		 	Date d1 = new Date(mYear,mMonth,mDay,mHour,mMinute);
 //	        Intent intent = new Intent(Intent.ACTION_EDIT);

@@ -81,7 +81,7 @@ public class DisplayInfo extends Activity{
 			
 			if(getNetwork()==true){
 			new Thread(new Runnable() {
-		        public void run() {    
+		        public void run() { 
 		        	download(type,rowid,comments,audio);
 		        }
 		    }).start();
@@ -265,7 +265,7 @@ public class DisplayInfo extends Activity{
 		    	  if(filesize<limit)
 		    		  return true;
 		    	  else
-		    		  return false;
+		    		  return true;
 		    	  
 		    	} else if (wifi == NetworkInfo.State.CONNECTED) {
 		    	    //wifi
@@ -276,12 +276,7 @@ public class DisplayInfo extends Activity{
 		    	}
 		      
 		}
-		public void displayfinal(View v,String message)
-		{
-			Intent foo = new Intent(this,VideoDownloaded.class);
-			foo.putExtra("message", message);
-	    	startActivity(foo);
-		}
+		
 		
 		
 }

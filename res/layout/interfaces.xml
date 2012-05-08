@@ -44,6 +44,16 @@
     android:clickable="true"
     android:focusableInTouchMode="true"
     />
+    <TextView  
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:text="CAPTURE VIDEO"
+    android:gravity="center_horizontal"
+    android:layout_marginTop="30px"
+    android:id="@+id/capture"
+    android:clickable="true"
+    android:focusableInTouchMode="true"
+    />
 
 <Button 
 	android:text="Press to Enable Voice Recognition"
@@ -63,6 +73,8 @@
 		  >
 		  
 </TextView>
+
+		
 
 
 </LinearLayout>

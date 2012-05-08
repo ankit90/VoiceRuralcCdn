@@ -39,9 +39,9 @@ public class MessageParser{
 			//Using factory get an instance of document builder
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			//parse using builder to get DOM representation of the XML file
-                        System.out.println("here");
+                  
 			dom = db.parse(is);
-                        System.out.println("here1");
+          
 		}catch(ParserConfigurationException pce) {
 			pce.printStackTrace();
 		}catch(SAXException se) {
@@ -76,11 +76,11 @@ public class MessageParser{
 	 */
 	private Message getMessage(Element ml) {
 		int size = getIntValue(ml,"size");
-		System.out.println("size"+size);
+		
 		String fileName = getTextValue(ml,"fileName");
-		System.out.println("file"+fileName);
+		
 		String title = getTextValue(ml,"Title");
-		System.out.println("title"+title);
+		
 		String desc = getTextValue(ml,"Desc");
 		String tags = getTextValue(ml,"Tags");
 		String time_stamp = getTextValue(ml,"Time_stamp");

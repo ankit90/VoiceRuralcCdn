@@ -44,6 +44,9 @@
 		<activity android:name=".VoiceRecorderActivity"
                   android:label="@string/app_name">
         </activity>
+        <activity android:name=".Capture"
+                  android:label="@string/app_name">
+        </activity>
 		
 		<activity android:name=".ViewVoice"
                   android:label="@string/app_name">

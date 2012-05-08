@@ -17,54 +17,52 @@ public class WorkerRunnable implements Runnable{
 		  	int bytesRead;
                         int current = 0;
 		    try{
+                        System.out.println("Request Recived From Client !!");
                          is = new DataInputStream(connection.getInputStream());
                          out = new DataOutputStream(connection.getOutputStream());
                          out.flush();
                          String msg1 = null;
-                         System.out.println("hahaharun");
                          msg1 = is.readLine();
-                         System.out.println(msg1);
+                         System.out.println("Control XML Message Received");
                          System.out.flush();
                          MessageParser mp = new MessageParser();
                          InputStream iss = new StringBufferInputStream(msg1);
 			 Message msg = mp.runExample(iss);
-                         System.out.println(msg1);
 
 		    	if (msg.getFunction().equalsIgnoreCase("upload"))
                         {
+                            System.out.println("Control Message Type : Upload - Filename: "+msg.getTitle());
                             if (msg.getsize() == 0)
                             {
-                                System.out.println("hereeeee0");
                                 //out.writeBytes("Waiting to receive " + msg.getfileName() + " directly.\n");
                                 out.flush();
                                 lessThan5(msg.getfileName(),Long.parseLong(msg.getTitle()));
                             }
                             else if (msg.getsize() == 1)
                             {
-                                System.out.println("hereeeee1");
-                                out.writeBytes("Waiting to receive " + msg.getfileName() + " through USB keys.\n");
+                                out.writeBytes("Waiting to receive " + msg.getTitle() + " through USB keys.\n");
                                 out.flush();
                             }
                             update(msg);
                         }
                         else if (msg.getFunction().equalsIgnoreCase("download"))
                         {
+                            System.out.println("Control Message Type : Download - Filename: "+msg.getTitle());
                             download(msg);
-                        }
-                        else if (msg.getFunction().equalsIgnoreCase("sync"))
-                        {
-                            sync();
                         }
                         else if (msg.getFunction().equalsIgnoreCase("comment"))
                         {
+                            System.out.println("Control Message Type : Comment");
                             comment(msg);
                         }
                         else if (msg.getFunction().equalsIgnoreCase("voice"))
                         {
+                            System.out.println("Control Message Type : Voice Comment");
                             voice(msg);
                         }
                         else if (msg.getFunction().equalsIgnoreCase("voice_download"))
                         {
+                            System.out.println("Control Message Type : Voice Comment Download");
                             vd(msg);
                         }
                          is.close();
@@ -78,7 +76,6 @@ public class WorkerRunnable implements Runnable{
 	  
 	  public void lessThan5(String fileName,long size){
 
-              System.out.println("less than");
               File f = new File(fileName);
               long d = 0;
               if (f.exists())
@@ -89,6 +86,7 @@ public class WorkerRunnable implements Runnable{
                     long loop = (size-d)/filesize;
                     long rem = (size-d)%filesize;
 		    try{
+                        long time = System.currentTimeMillis();
                         out.writeBytes(d+"\n");
                         long t=0;
                         FileOutputStream fos;
@@ -135,60 +133,16 @@ public class WorkerRunnable implements Runnable{
                             out.writeBytes("File " + fileName +" received succesfully.\n");
                             out.flush();
                             bos.close();
+                            long time1 = System.currentTimeMillis();
+                            System.out.println("Time taken for Upload ...... + "+(time1-time)+" msec");
 		    }catch(IOException ioException){
 				ioException.printStackTrace();
 			}
+
+
 	  }
 
-          public void sync() throws IOException{
-                Connection con = null;
-                Statement st = null;
-                ResultSet rs = null;
-
-                String url = "jdbc:mysql://localhost:3306/innobo";
-                String user = "root";
-                String password = "sadgurugyan";
-
-                try {
-                    con = DriverManager.getConnection(url, user, password);
-                    st = con.createStatement();
-                    rs = st.executeQuery("Select * from VoiceRuralCDN");
-                    String resp="",response="";
-                   while(rs.next()) {
-                        resp=(rs.getString(1))+"#"+(rs.getString(2))+"#"+(rs.getString(3))
-                            +"#"+(rs.getString(4))+"#"+(rs.getString(5))+"#"+(rs.getString(6));
-                        if(response.equals(""))
-                            response=resp;
-                        else
-                            response=response+"@"+resp;
-                    }
-                    response=response+"\n";
-                    System.out.println(response);
-                    out.writeBytes(response);
-                    out.flush();
-                } catch (SQLException ex) {
-                    Logger lgr = Logger.getLogger(WorkerRunnable.class.getName());
-                    lgr.log(Level.SEVERE, ex.getMessage(), ex);
-
-                } finally {
-                    try {
-                        if (rs != null) {
-                            rs.close();
-                        }
-                        if (st != null) {
-                            st.close();
-                        }
-                        if (con != null) {
-                            con.close();
-                        }
-
-                    } catch (SQLException ex) {
-                        Logger lgr = Logger.getLogger(WorkerRunnable.class.getName());
-                        lgr.log(Level.WARNING, ex.getMessage(), ex);
-                    }
-                }
-            }
-
+          
           public void comment(Message msg) throws IOException{
                 Connection con = null;
                 Statement st = null;
@@ -238,6 +192,7 @@ public class WorkerRunnable implements Runnable{
 
           public void download(Message msg){
               try{
+                    long time = System.currentTimeMillis();
                     File myFile = new File (msg.getTitle());
                     long downloaded_size = Long.parseLong(msg.getDesc());
                     long totalsize = myFile.length();
@@ -275,6 +230,9 @@ public class WorkerRunnable implements Runnable{
 		        out.flush();
 		    }
                     }
+                    long time1= System.currentTimeMillis();
+                    System.out.println("Time taken for download ...... + "+(time1-time)+" msec");
+
               }
               catch(IOException ioException){
                   ioException.printStackTrace();

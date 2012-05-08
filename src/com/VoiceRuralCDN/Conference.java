@@ -70,21 +70,6 @@ public class Conference extends ListActivity{
 //        
         setListAdapter(new ArrayAdapter(this,R.layout.conf_row,videoFileList));
 	}
-	 @Override
-	    protected void onDestroy() {
-	        super.onDestroy();
-	        mDbHelper.close();
-	    }
-	    @Override
-	    protected void onPause() {
-	        super.onPause();
-	        mDbHelper.close();
-	    }
-	    @Override
-	    protected void onStop() {
-	        super.onStop();
-	        mDbHelper.close();
-	    }
 	@Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);

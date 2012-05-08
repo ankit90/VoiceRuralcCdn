@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Click to enter the Rural CDN\n\n</string>
-    <string name="app_name">Voice Enhanced Rural CDN</string>
-    <string name="interfacs">Welcome to Voice Enabled Rural CDN</string>
+    <string name="hello">Click to enter CDN\n\n</string>
+    <string name="app_name">AndroidCDN</string>
+    <string name="interfacs">Welcome to Content Distribution Network</string>
     <string name="upload_file">UPLOAD VIDEO</string>
     <string name="upload">UPLOAD</string>
     <string name="download">DOWNLOAD</string>
@@ -15,4 +15,9 @@
     <string name="edit_note">Edit Note</string>
     <string name="search_label">Search</string>
     <string name="search_hint">Type of Video</string>
+    <string name="album_name">CameraSample</string>
+    <string name="btnIntendV">Take Video</string>
+    <string name="cannot">Cannot</string>
+        <string name="btnIntend">Take (big) Picture</string>
+    <string name="btnIntendS">Take (small) Picture</string>
 </resources>

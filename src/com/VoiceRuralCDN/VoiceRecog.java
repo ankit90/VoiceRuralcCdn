@@ -49,9 +49,12 @@ import android.widget.Toast;
 public class VoiceRecog extends Activity implements OnClickListener{
 	
 	private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
-    TextView tv,v1,v2,v3;
+    TextView tv,v1,v2,v3,v4;
     Button b;
     private NotesDbAdapter mDbHelper;
+    private int SharedDB=0;
+    private int SharedUpload=0;
+    private int SharedDownload=0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,6 +69,7 @@ public class VoiceRecog extends Activity implements OnClickListener{
         v1 = (TextView) findViewById(R.id.up);
         v2 = (TextView) findViewById(R.id.down);
         v3 = (TextView) findViewById(R.id.conf);
+        v4 = (TextView) findViewById(R.id.capture);
         PackageManager pm = getPackageManager();
         List<ResolveInfo> activities = pm.queryIntentActivities(
                 new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
@@ -74,6 +78,7 @@ public class VoiceRecog extends Activity implements OnClickListener{
         	v1.setOnClickListener(this);
         	v2.setOnClickListener(this);
         	v3.setOnClickListener(this);
+        	v4.setOnClickListener(this);
         } else {
             tv.setText("Recognizer not present");
         }
@@ -114,28 +119,39 @@ public class VoiceRecog extends Activity implements OnClickListener{
     	}
       
       
-    if(getNetwork()){  
-      new Thread(new Runnable() {
+    if(getNetwork()){
+    	
+      if(SharedDB==0){
+    	new Thread(new Runnable() {
 	        public void run() {    
 //	        	String schema=getDBschema();
 //	            syncSchema(schema);
-	  				db();      	          
+	        	SharedDB=1;
+	  				db();
+	  			SharedDB=0;
 	        }
 	    }).start();
-      
+      }
+     if(SharedUpload==0){ 
       new Thread(new Runnable() {
 	        public void run() {    
+	        	SharedUpload=1;
 	        	upload_thread();
+	        	SharedUpload=0;
 	            
 	        }
 	    }).start();
-      
+     }
+     if(SharedDownload==0){ 
       new Thread(new Runnable() {
 	        public void run() {    
+	        	SharedDownload=1;
 	        	download_thread();
+	        	SharedDownload=0;
 	            
 	        }
 	    }).start();
+     }
     }
     
       
@@ -266,7 +282,7 @@ public class VoiceRecog extends Activity implements OnClickListener{
 				    	        
 				    	        c.moveToNext();
 					    		count--;
-					    		Thread.sleep(100000);      
+					    		//Thread.sleep(100000);      
     			}
 		    		
 					
@@ -432,7 +448,7 @@ public class VoiceRecog extends Activity implements OnClickListener{
 					
 					count--;
 					c.moveToNext();
-					Thread.sleep(10000);
+					//Thread.sleep(10000);
 					
     				}
     				}
@@ -453,60 +469,6 @@ public class VoiceRecog extends Activity implements OnClickListener{
 	    intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speech recognition demo");
 	    startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);
 	}
-	private void syncSchema(String schema){
-    	String[] arr = schema.split("@");
-    	for(int i=0;i<arr.length;i++){
-    		String [] arr1 = arr[i].split("#");
-    		Cursor cur =mDbHelper.searchName(arr1[0]);
-    		if(!cur.moveToFirst()){
-    				mDbHelper.createNote(arr1[0], arr1[1], arr1[2], arr1[3],"0",arr1[5],arr1[4]);
-    		}
-    		else if(cur!=null && (cur.getString(5).equalsIgnoreCase("1")||
-    				cur.getString(5).equalsIgnoreCase("0"))){
-    			mDbHelper.updateNote(cur.getInt(0),arr1[0], arr1[1], arr1[2], arr1[3],cur.getString(5),arr1[5],arr1[4]);
-    		}
-    	}
-    }
-    private String getDBschema(){
-    	String response="";
-    	Socket socket = null;
-        DataOutputStream dataOutputStream = null;
-        DataInputStream dataInputStream = null;
-    	try {
-    		Resources resources = this.getResources();
-			AssetManager assetManager = resources.getAssets();
-			// Read from the /assets directory
-			InputStream in = assetManager.open("config.properties");
-			Properties properties = new Properties();
-			properties.load(in);
-			final int filesize = Integer.parseInt(properties.getProperty("SizeLimit"));
-			socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
-
-	  		dataOutputStream = new DataOutputStream(socket.getOutputStream());
-		  	dataInputStream = new DataInputStream(socket.getInputStream());
-		  	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
-		  				  "<Message><size>1</size><fileName>efew</fileName>" +
-		  				  "<Title>efwe</Title><Desc>efwf</Desc>"+
-	           			  "<Tags>ewfw</Tags><Time_stamp>fewfw</Time_stamp>"+
-	                      "<Conference_stamp>ewfw</Conference_stamp>"
-	                      +"<Function>sync</Function>" + "</Message></root>\n";
-		    dataOutputStream.writeBytes(msg);
-		    dataOutputStream.flush();
-		    response =(dataInputStream.readLine());
-			dataInputStream.close();
-			dataOutputStream.close();
-			socket.close();
-			
-
-			  // now get the data from each entry
-			
-			
-			
-    	}catch(Exception e){}
-	    
-    	return response;
-    }
-    
     
     public void db(){
     	
@@ -590,8 +552,14 @@ public class VoiceRecog extends Activity implements OnClickListener{
 			download(v);
 		if (v.getId() == R.id.conf)
 			conference(v);
+		if (v.getId() == R.id.capture)
+			capture(v);
 	}
 
+	private void capture(View v) {
+		// TODO Auto-generated method stub
+		startActivity(new Intent(this,Capture.class));
+	}
 	public void upload (View v){
 		startActivity(new Intent(this,Upload.class));
 	}
@@ -617,6 +585,8 @@ public class VoiceRecog extends Activity implements OnClickListener{
 	        	startActivity(new Intent(this,TabOptions.class));
 	        else if (heard.contains("conference"))
 	        	startActivity(new Intent(this,Conference.class));
+	        else if (heard.contains("capture"))
+	        	startActivity(new Intent(this,Capture.class));
 	        else 
 	        	tv.setText("You said "+heard+" : Not a recognized command");//startActivity(new Intent(this,Download.class));
 	    }

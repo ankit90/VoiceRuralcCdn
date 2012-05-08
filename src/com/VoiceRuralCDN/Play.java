@@ -1,9 +1,6 @@
 package com.VoiceRuralCDN;
 
 import android.app.Activity;
-//import android.content.Intent;
-import android.graphics.PixelFormat;
-import android.net.Uri;
 import android.os.Bundle;
 import android.widget.MediaController;
 import android.widget.VideoView;
@@ -28,15 +25,4 @@ public class Play extends Activity{
         
 
     }
-    
-    public void videoPlayer(String path, String fileName, boolean autoplay){
-        getWindow().setFormat(PixelFormat.TRANSLUCENT);
-        VideoView videoHolder = new VideoView(this);
-        videoHolder.setMediaController(new MediaController(this));
-        videoHolder.setVideoURI(Uri.parse(path+"/"+fileName));
-        videoHolder.requestFocus();
-        if(autoplay){
-            videoHolder.start();
-        }
- }
 }
