@@ -8,6 +8,7 @@ import java.util.Properties;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -15,6 +16,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -143,7 +145,11 @@ public class DisplayInfo extends Activity{
 				Properties properties = new Properties();
 				properties.load(in);
 				final int filesize = Integer.parseInt(properties.getProperty("SizeLimit"));
-				socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
+				SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		        
+				String server=pref.getString("ip", "192.168.1.185");//properties.getProperty("ServerIp");
+				String port =pref.getString("port","2004");//Integer.parseInt(properties.getProperty("ServerPort"));
+				socket = new Socket(server,Integer.parseInt(port));
 				if(socket==null)
 				{
 					runOnUiThread(new Runnable() {
@@ -253,19 +259,23 @@ public class DisplayInfo extends Activity{
 		public boolean opportunistic_networking(long filesize,long limit){
 			
 			 ConnectivityManager conMan = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
 		      //mobile
 		     android.net.NetworkInfo.State mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
-
 		      //wifi
 		      android.net.NetworkInfo.State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
-		      
-		      if (mobile == NetworkInfo.State.CONNECTED) {
+		      SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);		        
+			  String option1=pref.getString("list1","2");//properties.getProperty("ServerIp");
+	     if (mobile == NetworkInfo.State.CONNECTED) {
 		    	    //mobile
-		    	  if(filesize<limit)
+		    	  
+		    	  
+		    	  if(filesize < limit)
 		    		  return true;
+		    	  else if( filesize >= limit && option1.equals("1")){
+		    		  return true;
+		    	  }
 		    	  else
-		    		  return true;
+		    		  return false;
 		    	  
 		    	} else if (wifi == NetworkInfo.State.CONNECTED) {
 		    	    //wifi

@@ -12,12 +12,14 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -99,7 +101,11 @@ public class VoiceRecorderActivity extends Activity implements OnClickListener {
 			InputStream in = assetManager.open("config.properties");
 			Properties properties = new Properties();
 			properties.load(in);
-			socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
+			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+	        
+			String server=pref.getString("ip", "192.168.1.185");//properties.getProperty("ServerIp");
+			String port =pref.getString("port","2004");//Integer.parseInt(properties.getProperty("ServerPort"));
+			socket = new Socket(server,Integer.parseInt(port));
 			dataOutputStream = new DataOutputStream(socket.getOutputStream());
 		  	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +
 		  				  "<Message><size>1</size><fileName>"+"f"+"</fileName>" +

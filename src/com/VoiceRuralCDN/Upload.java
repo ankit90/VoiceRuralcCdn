@@ -1,6 +1,8 @@
 package com.VoiceRuralCDN;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
+import android.preference.*;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
@@ -228,14 +230,16 @@ public void upload(//String Video_name,String Video_tags,String Video_desc,Strin
 		Properties properties = new Properties();
 		properties.load(in);
 		final int filesize = Integer.parseInt(properties.getProperty("SizeLimit"));
-		String server=properties.getProperty("ServerIp");
-		int port =Integer.parseInt(properties.getProperty("ServerPort"));
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        
+		String server=pref.getString("ip", "192.168.1.185");//properties.getProperty("ServerIp");
+		String port =pref.getString("port","2004");//Integer.parseInt(properties.getProperty("ServerPort"));
 		
 		
 		Date d = new Date();   
 	  	if(Video_path.equalsIgnoreCase(""))
 	    {
-	  		socket = new Socket(server,port);
+	  		socket = new Socket(server,Integer.parseInt(port));
 	  		if(socket==null){
 				runOnUiThread(new Runnable() {
 		            public void run() {
@@ -283,7 +287,7 @@ public void upload(//String Video_name,String Video_tags,String Video_desc,Strin
 		 	boolean flag= opportunistic_networking(totalsize,(long)filesize);
 		 	if(flag==true)
 		 	{
-		 		socket = new Socket(server,port);
+		 		socket = new Socket(server,Integer.parseInt(port));
 		  		if(socket==null){
 					runOnUiThread(new Runnable() {
 			            public void run() {
@@ -364,17 +368,21 @@ public void upload(//String Video_name,String Video_tags,String Video_desc,Strin
 public boolean opportunistic_networking(long filesize,long limit){
 	
 	 ConnectivityManager conMan = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
      //mobile
     android.net.NetworkInfo.State mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
-
      //wifi
      android.net.NetworkInfo.State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
-     
-     if (mobile == NetworkInfo.State.CONNECTED) {
+     SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);		        
+	  String option1=pref.getString("list1","2");//properties.getProperty("ServerIp");
+ if (mobile == NetworkInfo.State.CONNECTED) {
    	    //mobile
-   	  if(filesize<limit)
+   	  
+   	  
+   	  if(filesize < limit)
    		  return true;
+   	  else if( filesize >= limit && option1.equals("1")){
+   		  return true;
+   	  }
    	  else
    		  return false;
    	  
@@ -424,14 +432,14 @@ public boolean getNetwork(){
 		}
 	    Video_path=path1;
 		 mDbHelper.createNote(Video_name,Video_desc, Video_tags, Video_path, "2", "default",
-				 mHour+":"+mMinute+" "+mDay+"-"+mMonth+"-"+mYear);
+				 mHour+":"+mMinute+" "+mDay+"-"+(mMonth+1)+"-"+mYear);
 		 textIn.setText("Your Content has been Queued for Upload");
 		 
 		 if(getNetwork()){
 		 new Thread(new Runnable() {
 		        public void run() {    
 		        	upload(//Video_name,Video_tags,Video_desc,Video_path,
-		        						mHour+":"+mMinute+" "+mDay+"-"+mMonth+"-"+mYear);
+		        						mHour+":"+mMinute+" "+mDay+"-"+(mMonth+1)+"-"+mYear);
 		        }
 		    }).start();
 		 }

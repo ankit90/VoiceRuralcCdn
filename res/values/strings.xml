@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="hello">Click to enter CDN\n\n</string>
-    <string name="app_name">AndroidCDN</string>
+    <string name="app_name">Android CDN</string>
     <string name="interfacs">Welcome to Content Distribution Network</string>
     <string name="upload_file">UPLOAD VIDEO</string>
     <string name="upload">UPLOAD</string>
@@ -20,4 +20,14 @@
     <string name="cannot">Cannot</string>
         <string name="btnIntend">Take (big) Picture</string>
     <string name="btnIntendS">Take (small) Picture</string>
+
+	<string-array name="PreferencesGroupItems">
+	<item >GPRS</item>
+	<item >WiFi</item>
+	</string-array>
+
+	<string-array name="PreferencesGroupValues">
+	<item >1</item>
+	<item >2</item>
+	</string-array>
 </resources>

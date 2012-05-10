@@ -23,7 +23,7 @@ public class SIP extends Activity{
         if(mSipManager == null) {
             mSipManager = SipManager.newInstance(this);
         }
-        String username="ankit",domain="sip2sip.info",password="j6i2xdejjj";
+        String username="ankit",domain="192.168.1.12",password="asdf";
         try{
         SipProfile.Builder builder = new SipProfile.Builder(username, domain);
         builder.setPassword(password);
@@ -66,7 +66,7 @@ public class SIP extends Activity{
         	      // Do something.
         	   }
         	};
-        	String sipAddress ="sip:anupam90@sip2sip.info";
+        	String sipAddress ="sip:anupam@192.168.1.12";
           mSipManager.makeAudioCall(mSipProfile.getUriString(), sipAddress, listener, 30);
         
         }catch(Exception e){}

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:title="Settings">
+  <PreferenceCategory
+     android:title="Network Settings">
+	    <EditTextPreference
+        android:key="ip"
+        android:defaultValue="192.168.1.185"
+        android:title="Server IP"
+        android:summary="Enter Server IP"
+        android:dialogTitle="Server IP"
+    />
+    <EditTextPreference
+        android:key="port"
+        android:defaultValue="2004"
+        android:title="Server Port"
+        android:summary="Enter Server Port"
+        android:dialogTitle="Server Port"
+    />
+  </PreferenceCategory>
+  <PreferenceCategory
+     android:title="Opportunistic Network Settings">
+     <ListPreference
+        android:key="list1"
+        android:title="Option for more than limit"
+        android:summary="Select item"
+        android:entries="@array/PreferencesGroupItems"
+        android:entryValues="@array/PreferencesGroupValues"
+        android:defaultValue="2"
+        />
+      
+     </PreferenceCategory>
+</PreferenceScreen>

@@ -8,12 +8,14 @@ import android.app.Activity;
 import android.app.ListActivity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -63,7 +65,11 @@ public class ViewVoice extends ListActivity{
 				Properties properties = new Properties();
 				properties.load(in);
 				final int filesize = Integer.parseInt(properties.getProperty("SizeLimit"));
-				socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
+				SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		        
+				String server=pref.getString("ip", "192.168.1.185");//properties.getProperty("ServerIp");
+				String port =pref.getString("port","2004");//Integer.parseInt(properties.getProperty("ServerPort"));
+				socket = new Socket(server,Integer.parseInt(port));
 				dataOutputStream = new DataOutputStream(socket.getOutputStream());
 			  	dataInputStream = new DataInputStream(socket.getInputStream());
 			  	String msg =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" +

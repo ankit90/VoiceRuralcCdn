@@ -28,7 +28,8 @@ public class Options extends Activity implements OnClickListener{
 	 // TODO Auto-generated method stub
 		switch(v.getId()) {
 		case R.id.button1:
-			
+			Intent foo = new Intent(this,SIP.class);
+			startActivity(foo);
 			break;
         case R.id.button2:
            

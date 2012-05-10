@@ -22,7 +22,7 @@ public class SIP_Client extends Activity {
         if(mSipManager == null) {
             mSipManager = SipManager.newInstance(this);
         }
-        String username="anupam90",domain="sip2sip.info",password="j6i2xdejjj";
+        String username="ankit",domain="192.168.1.12",password="asdf";
         try{
         SipProfile.Builder builder = new SipProfile.Builder(username, domain);
         builder.setPassword(password);

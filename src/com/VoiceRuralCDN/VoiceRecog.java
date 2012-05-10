@@ -31,6 +31,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.AssetManager;
@@ -39,7 +40,11 @@ import android.database.Cursor;
 import android.net.*;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -55,11 +60,28 @@ public class VoiceRecog extends Activity implements OnClickListener{
     private int SharedDB=0;
     private int SharedUpload=0;
     private int SharedDownload=0;
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menutext:
+            	startActivity(new Intent(this,Settings.class));
+                break;
+        }
+        return true;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        
         setContentView(R.layout.interfaces);
         
         mDbHelper = new NotesDbAdapter(this);
@@ -211,7 +233,12 @@ public class VoiceRecog extends Activity implements OnClickListener{
 								
 								if(flag==true)
 								{
-									socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
+									SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+									
+									final String server=pref.getString("ip", "192.168.1.185");//properties.getProperty("ServerIp");
+									final String port =pref.getString("port","2004");//Integer.parseInt(properties.getProperty("ServerPort"));
+									
+									socket = new Socket(server,Integer.parseInt(port));
 						    		
 									
 									if(socket==null){
@@ -300,17 +327,21 @@ public class VoiceRecog extends Activity implements OnClickListener{
     public boolean opportunistic_networking(long filesize,long limit){
 		
 		 ConnectivityManager conMan = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
 	      //mobile
 	     android.net.NetworkInfo.State mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
-
 	      //wifi
 	      android.net.NetworkInfo.State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
-	      
-	      if (mobile == NetworkInfo.State.CONNECTED) {
+	      SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);		        
+		  String option1=pref.getString("list1","2");//properties.getProperty("ServerIp");
+    if (mobile == NetworkInfo.State.CONNECTED) {
 	    	    //mobile
-	    	  if(filesize<limit)
+	    	  
+	    	  
+	    	  if(filesize < limit)
 	    		  return true;
+	    	  else if( filesize >= limit && option1.equals("1")){
+	    		  return true;
+	    	  }
 	    	  else
 	    		  return false;
 	    	  
@@ -359,7 +390,11 @@ public class VoiceRecog extends Activity implements OnClickListener{
 						Properties properties = new Properties();
 						properties.load(in);
 						final int filesize = Integer.parseInt(properties.getProperty("SizeLimit"));
-						socket = new Socket(properties.getProperty("ServerIp"),Integer.parseInt(properties.getProperty("ServerPort")));
+						SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+				        
+						String server=pref.getString("ip", "192.168.1.185");//properties.getProperty("ServerIp");
+						String port =pref.getString("port","2004");//Integer.parseInt(properties.getProperty("ServerPort"));
+						socket = new Socket(server,Integer.parseInt(port));
 						if(socket==null)
 						{
 							runOnUiThread(new Runnable() {
@@ -484,10 +519,9 @@ public class VoiceRecog extends Activity implements OnClickListener{
     		Resources resources = this.getResources();
 			AssetManager assetManager = resources.getAssets();
 			// Read from the /assets directory
-			InputStream in = assetManager.open("config.properties");
-			Properties properties = new Properties();
-			properties.load(in);
-			String server=properties.getProperty("ServerIp");
+			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+			String server=pref.getString("ip", "192.168.1.185");//properties.getProperty("ServerIp");
+		
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			HttpPost httpPost = new HttpPost("http://"+server+"/script.php");
 

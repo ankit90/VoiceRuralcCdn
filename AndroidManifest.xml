@@ -26,9 +26,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
 		<activity android:name=".FilePickerActivity"
                   android:label="@string/app_name">
         </activity>
+        
         <activity android:name=".SIP"
                   android:label="@string/app_name">
         </activity>
@@ -44,6 +46,7 @@
 		<activity android:name=".VoiceRecorderActivity"
                   android:label="@string/app_name">
         </activity>
+        
         <activity android:name=".Capture"
                   android:label="@string/app_name">
         </activity>
@@ -51,6 +54,7 @@
 		<activity android:name=".ViewVoice"
                   android:label="@string/app_name">
         </activity>
+        
         <activity android:name=".Options"
                   android:label="@string/app_name">
         </activity>
@@ -58,6 +62,7 @@
 		<activity android:name=".AudioRecorder"
                   android:label="@string/app_name">
         </activity>
+		
 		<activity android:name=".ViewComment"
                   android:label="@string/app_name">
         </activity>
@@ -78,11 +83,11 @@
                 
             </intent-filter>
         </activity>
+        
         <activity android:name=".Download"
                   android:label="@string/app_name">
                    <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
-                <!-- <category android:name="android.intent.category.DEFAULT" />-->
             </intent-filter>
             <meta-data android:name="android.app.searchable"
                        android:resource="@xml/searchable" />
@@ -90,69 +95,74 @@
                 
             </intent-filter>
         </activity>
+        
         <activity android:name=".UploadFile"
                   android:label="@string/app_name">
             <intent-filter>
                 
             </intent-filter>
         </activity>
+        
         <activity android:name=".Uploadmenu"
                   android:label="@string/app_name">
             <intent-filter>
                 
             </intent-filter>
         </activity>
+        
         <activity android:name=".SearchResult"
                   android:label="@string/app_name">
             <intent-filter>
                 
             </intent-filter>
         </activity>
+        
         <activity android:name=".TabOptions"
                  android:label="@string/app_name">
            
         </activity>
+        
         <activity android:name=".NoteEdit"
                   android:label="@string/app_name">
             <intent-filter>
                 
             </intent-filter>
         </activity>
+        
         <activity android:name=".NotesDbAdapter"
                   android:label="@string/app_name">
             <intent-filter>
                 
             </intent-filter>
         </activity>
+        
         <activity android:name=".Play"
                   android:label="@string/app_name">
             <intent-filter>
                 
             </intent-filter>
         </activity>
+        
          <activity android:name=".VideoDownloaded"
                   android:label="@string/app_name">
             <intent-filter>
                 
             </intent-filter>
         </activity>
+        
          <activity android:name=".DisplayInfo"
                   android:label="@string/app_name">
             <intent-filter>
                 
             </intent-filter>
         </activity>
-        <activity android:name=".Video_thumnailsActivity"
+        
+        <activity android:name=".Settings"
                   android:label="@string/app_name">
-                   <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-                <!-- <category android:name="android.intent.category.DEFAULT" />-->
-            </intent-filter>
-            <meta-data android:name="android.app.searchable"
-                       android:resource="@xml/searchable" />
             <intent-filter>
                 
             </intent-filter>
         </activity>
+        
     </application>
 </manifest>
