@@ -31,7 +31,7 @@ public class WorkerRunnable implements Runnable{
 
 		    	if (msg.getFunction().equalsIgnoreCase("upload"))
                         {
-                            System.out.println("Control Message Type : Upload - Filename: "+msg.getTitle());
+                            System.out.println("Control Message Type : Upload - Filename: "+msg.getfileName());
                             if (msg.getsize() == 0)
                             {
                                 //out.writeBytes("Waiting to receive " + msg.getfileName() + " directly.\n");
@@ -40,7 +40,7 @@ public class WorkerRunnable implements Runnable{
                             }
                             else if (msg.getsize() == 1)
                             {
-                                out.writeBytes("Waiting to receive " + msg.getTitle() + " through USB keys.\n");
+                                out.writeBytes("Waiting to receive " + msg.getfileName() + " through USB keys.\n");
                                 out.flush();
                             }
                             update(msg);
